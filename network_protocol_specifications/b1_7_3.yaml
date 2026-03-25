@@ -1,0 +1,542 @@
+Types:
+    -   name: byte
+        Rust Equivalent: MCByte
+        Data:
+            -   value: i8
+
+    -   name: short
+        Rust Equivalent: MCShort
+        Data:
+            -   value: i16
+
+    -   name: int
+        Rust Equivalent: MCInt
+        Data:
+            -   value: i32
+
+    -   name: long
+        Rust Equivalent: MCLong
+        Data:
+            -   value: i64
+
+    -   name: float
+        Rust Equivalent: MCFloat
+        Data:
+            -   value: f32
+
+    -   name: double
+        Rust Equivalent: MCDouble
+        Data:
+            -   value: f64
+
+    -   name: string8
+        Rust Equivalent: MCString8
+        Data:
+            -   length: i16
+            -   value: StringUTF8
+
+    -   name: string16
+        Rust Equivalent: MCString16
+        Data:
+            -   length: i16
+            -   value: StringUCS2
+
+    -   name: bool
+        Rust Equivalent: MCBool
+        Data:
+            -   value: bool
+
+    -   name: metadata
+        Rust Equivalent: MCMetadata
+        Data:
+            -   metadata type: i8 #TODO: replace with struct of metadata types
+            -   value: i8 #TODO: replace with correct type
+
+    -   name: MapChunk
+        Rust Equivalent: MCMapChunk
+        Data:
+            -   length: i32 #Compressed Size
+            -   Compressed Data: Vec<u8> #Compressed Data
+
+    -   name: BlockMetadataArray
+        Rust Equivalent: MCBlockMetadataArray
+        arg: "length: i32"
+        Data:
+            -   value: Vec<MCMetadata>
+
+    -   name: BlockTypeArray
+        Rust Equivalent: MCBlockTypeArray
+        arg: "length: i32"
+        Data:
+            -   value: Vec<u8>
+
+    -   name: BlockCoordinateArray
+        Rust Equivalent: MCBlockCoordinateArray
+        arg: "length: i32"
+        Data:
+            -   value: Vec<u8>
+
+    -   name: InventoryPayload
+        Rust Equivalent: MCInventoryPayload
+        arg: "length: i32"
+        Data:
+            -   value: Vec<MCItem>
+
+    -   name: BlockUpdateArray
+        Rust Equivalent: MCBlockUpdateArray
+        Data:
+            -   length: i16 #Array Size
+            -   Coordinate Array: MCBlockCoordinateArray
+            -   Type Array: MCBlockTypeArray
+            -   Metadata Array: MCBlockMetadataArray
+
+    -   name: ExplosionUpdateArray
+        Rust Equivalent: MCExplosionUpdate
+        Data:
+            -   length: i32 #Record Count
+            -   Records: MCBlockCoordinateArray
+
+Packets:
+    -   name: Keep Alive
+        id: 0x00
+        Data:
+
+    -   name: Login Request
+        id: 0x01
+        Data:
+            -   Protocol Version: int
+            -   Username: string16
+            -   Map Seed: long
+            -   Dimension: byte
+
+    -   name: Handshake
+        id: 0x02
+        Data:
+            -   Username: string16
+
+    -   name: Chat Message
+        id: 0x03
+        Data:
+            -   Message: string16
+
+    -   name: Time Update
+        id: 0x04
+        Data:
+            Time: long
+
+    -   name: Entity Equipment
+        id: 0x05
+        Data:
+            -   Entity ID: int
+            -   Slot: short
+            -   Item ID: short
+            -   Unknown: short
+
+    -   name: Spawn Position
+        id: 0x06
+        Data:
+            -   X: int
+            -   Y: int
+            -   Z: int
+
+    -   name: Use Entity
+        id: 0x07
+        Data:
+            -   User: int
+            -   Target: int
+            -   Left Click: bool
+
+    -   name: Update Health
+        id: 0x08
+        Data:
+            -   Health: short
+
+    -   name: Respawn
+        id: 0x09
+        Data:
+            -   World: byte
+
+    -   name: Player
+        id: 0x0A
+        Data:
+            -   On Ground: bool
+
+    -   name: Player Position
+        id: 0x0B
+        Data:
+            -   X: double
+            -   Y: double
+            -   Stance: double
+            -   Z: double
+            -   On Ground: bool
+
+    -   name: Player Look
+        id: 0x0C
+        Data:
+            -   Yaw: float
+            -   Pitch: float
+            -   On Ground: bool
+
+    -   name: Player Position and Look
+        id: 0x0D
+        Data:
+            -   X: double
+            -   Y: double
+            -   Stance: double
+            -   Z: double
+            -   Yaw: float
+            -   Pitch: float
+            -   On Ground: bool
+
+    -   name: Player Digging
+        id: 0x0E
+        Data:
+            -   Status: byte
+            -   X: int
+            -   Y: byte
+            -   Z: int
+            -   Face: byte
+
+    -   name: Player Block Placement
+        id: 0x0f
+        Data:
+            -   X: int
+            -   Y: byte
+            -   Z: int
+            -   Direction: byte
+            -   Block or Item ID: short
+            -   Amount: byte
+            -   Damage: short
+
+    -   name: Holding Change
+        id: 0x10
+        Data:
+            -   Slot ID: short
+
+    -   name: Use Bed
+        id: 0x11
+        Data:
+            -   Entity ID: int
+            -   In Bed: byte
+            -   X: int
+            -   Y: byte
+            -   Z: int
+
+    -   name: Animation
+        id: 0x12
+        Data:
+            -   EID: int
+            -   Animate: byte
+
+    -   name: Entity Action
+        id: 0x13
+        Data:
+            -   EID: int
+            -   Action: byte
+
+    -   name: Named Entity Spawn
+        id: 0x14
+        Data:
+            -   EID: int
+            -   Player Name: string16
+            -   X: int
+            -   Y: int
+            -   Z: int
+            -   Rotation: byte
+            -   Pitch: byte
+            -   Current Item: short
+
+    -   name: Pickup Spawn
+        id: 0x15
+        Data:
+            -   EID: int
+            -   Item: short
+            -   Count: byte
+            -   Damage or Data: short
+            -   X: int
+            -   Y: int
+            -   Z: int
+            -   Rotation: byte
+            -   Pitch: byte
+            -   Roll: byte
+
+    -   name: Collect Item
+        id: 0x16
+        Data:
+            -   Collected EID 1: int
+            -   Collected EID 2: int
+
+    -   name: Add Object or Vehicle
+        id: 0x17
+        Data:
+            -   EID: int
+            -   Entity Type: byte
+            -   X: int
+            -   Y: int
+            -   Z: int
+            -   Unknown Flag: int
+            -   Unknown 1: short
+            -   Unknown 2: short
+            -   Unknown 3: short
+
+    -   name: Mob Spawn
+        id: 0x18
+        Data:
+            -   EID: int
+            -   Entity Type: byte
+            -   X: int
+            -   Y: int
+            -   Z: int
+            -   Yaw: byte
+            -   Pitch: byte
+            -   Data Stream: metadata
+
+    -   name: Painting
+        id: 0x19
+        Data:
+            -   Entity ID: int
+            -   Titile: string16
+            -   X: int
+            -   Y: int
+            -   Z: int
+            -   Direction: int
+
+    -   name: Stance Update
+        id: 0x1B
+        Data:
+            -   Unknown 1: float
+            -   Unknown 2: float
+            -   Unknown 3: float
+            -   Unknown 4: float
+            -   Unknown 5: bool
+            -   Unknown 6: bool
+
+    -   name: Entity Velocity
+        id: 0x1C
+        Data:
+            -   Entity ID: int
+            -   Velocity X: short
+            -   Velocity Y: short
+            -   Velocity Z: short
+
+    -   name: Destroy Entity
+        id: 0x1D
+        Data:
+            -   EID: int
+
+    -   name: Entity
+        id: 0x1E
+        Data:
+            -   EID: int
+
+    -   name: Entity Relative Move
+        id: 0x1F
+        Data:
+            -   EID: int
+            -   dX: byte
+            -   dY: byte
+            -   dZ: byte
+
+    -   name: Entity Look
+        id: 0x20
+        Data:
+            -   EID: int
+            -   Yaw: byte
+            -   Pitch: byte
+
+    -   name: Entity Look and Relative Move
+        id: 0x21
+        Data:
+            -   EID: int
+            -   dX: byte
+            -   dY: byte
+            -   dZ: byte
+            -   Yaw: byte
+            -   Pitch: byte
+
+    -   name: Entity Teleport
+        id: 0x22
+        Data:
+            -   EID: int
+            -   X: int
+            -   Y: int
+            -   Z: int
+            -   Yaw: byte
+            -   Pitch: byte
+
+    -   name: Entity Status
+        id: 0x26
+        Data:
+            -   Entity ID: int
+            -   Entity Status: byte
+
+    -   name: Attach Entity
+        id: 0x27
+        Data:
+            -   Entity ID: int
+            -   Vehicle ID: int
+
+    -   name: Entity metadata
+        id: 0x28
+        Data:
+            -   Entity ID: int
+            -   Entity Metadata: metadata
+
+    -   name: Pre Chunk
+        id: 0x32
+        Data:
+            -   X: int
+            -   Z: int
+            -   Mode: bool
+
+    -   name: Map Chunk
+        id: 0x33
+        Data:
+            -   X: int
+            -   Y: short
+            -   Z: int
+            -   Size_X: byte
+            -   Size_Y: byte
+            -   Size_Z: byte
+            -   Map Chunk: MapChunk
+
+    -   name: Multi Block Change
+        id: 0x34
+        Data:
+            -   Chunk X: int
+            -   Chunk Z: int
+            -   Block Update Array: BlockUpdateArray
+
+    -   name: Block Change
+        id: 0x35
+        Data:
+            -   X: int
+            -   Y: byte
+            -   Z: int
+            -   Block Type: byte
+            -   Block Metadata: byte
+
+    -   name: Block Action
+        id: 0x36
+        Data:
+            -   X: int
+            -   Y: short
+            -   Z: int
+            -   Instrument Type: byte
+            -   Pitch: byte
+
+    -   name: Explosion
+        id: 0x3C
+        Data:
+            -   X: double
+            -   Y: double
+            -   Z: double
+            -   Unknown: float
+            -   Explosion Update Array: ExplosionUpdateArray
+
+    -   name: Sound Effect
+        id: 0x3D
+        Data:
+            -   Effect ID: int
+            -   X: int
+            -   Y: byte
+            -   Z: int
+            -   Sound Data: int
+
+    -   name: New or Invalid State
+        id: 0x46
+        Data:
+            -   Reason: byte
+
+    -   name: Thunderbolt
+        id: 0x47
+        Data:
+            -   Entity ID: int
+            -   Unknown: bool
+            -   X: int
+            -   Y: int
+            -   Z: int
+
+    -   name: Open Window
+        id: 0x64
+        Data:
+            -   Window ID: byte
+            -   Inventory Type: byte
+            -   Window Title: string8
+            -   Number of Slots: byte
+
+    -   name: Close Window
+        id: 0x65
+        Data:
+
+    -   name: Window Click
+        id: 0x66
+        Data:
+            -   Window ID: byte
+            -   Slot: short
+            -   Right Click: bool
+            -   Action Number: short
+            -   Shift: bool
+            -   Item ID: short
+            -   Item Count: byte
+            -   Item Uses: short
+
+    -   name: Set Slot
+        id: 0x67
+        Data:
+            -   Window ID: byte
+            -   Slot: short
+            -   Item ID: short
+            -   Item Count: byte
+            -   Item Uses: short
+
+    -   name: Window Items
+        id: 0x68
+        Data:
+            -   Window ID: byte
+            -   Count: short
+            -   Payload: InventoryPayload
+
+    -   name: Update Progress Bar
+        id: 0x69
+        Data:
+            -   Window ID: byte
+            -   Progress Bar: short
+            -   Value: short
+
+    -   name: Transaction
+        id: 0x6A
+        Data:
+            -   Window ID: byte
+            -   Action Number: short
+            -   Accepted: bool
+
+    -   name: Update Sign
+        id: 0x82
+        Data:
+            -   X: int
+            -   Y: short
+            -   Z: int
+            -   Text1: string16
+            -   Text2: string16
+            -   Text3: string16
+            -   Text4: string16
+
+    -   name: Item Data
+        id: 0x83
+        Data:
+            -   Item Type: short
+            -   Item ID: short
+            -   Text length: byte
+            -   Text: string8
+
+    -   name: Increment Statistic
+        id: 0xC8
+        Data:
+            -   Statistic ID: int
+            -   Amount: byte
+
+    -   name: Disconnect or Kick
+        id: 0xFF
+        Data:
+            -   Reason: string16
