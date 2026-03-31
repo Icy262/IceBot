@@ -1,3 +1,5 @@
+#special flag: true means that the contained data is elementary (cannot be expressed as a collection of simpler types), or requires special logic to read and write beyond simply reading the data value from stream.
+#if the special flag is set to true, format strings must be included for special read and special write that can be used to generate the required code 
 Types:
     -   MC name: byte
         Rust Equivalent: MCByte
