@@ -1,88 +1,141 @@
 Types:
-    -   name: byte
+    -   MC name: byte
         Rust Equivalent: MCByte
+        special: true
+        special read: "stream.read_i8().expect(\"Should be able to read i8 from stream\")"
+        special write: "stream.write_i8(data.{variable_name}).expect(\"Should be able to write i8 to stream\")"
         Data:
             -   value: i8
 
-    -   name: short
+    -   MC name: ubyte
+        Rust Equipment: MCUByte
+        special: true
+        special read: "stream.read_u8().expect(\"Should be able to read u8 from stream\")"
+        special write: "stream.write_u8(data.{variable_name}).expect(\"Should be able to write u8 to stream\")"
+        Data:
+            -   value: u8
+
+    -   MC name: short
         Rust Equivalent: MCShort
+        special: true
+        special read: "stream.read_i16::<BigEndian>().expect(\"Should be able to read i16 from stream\")"
+        special write: "stream.write_i16::<BigEndian>(data.{variable_name}).expect(\"Should be able to write i16 to stream\")"
         Data:
             -   value: i16
 
-    -   name: int
+    -   MC name: int
         Rust Equivalent: MCInt
+        special: true
+        special read: "stream.read_i32::<BigEndian>().expect(\"Should be able to read i32 from stream\")"
+        special write: "stream.write_i32::<BigEndian>(data.{variable_name}).expect(\"Should be able to write i32 to stream\")"
         Data:
             -   value: i32
 
-    -   name: long
+    -   MC name: long
         Rust Equivalent: MCLong
+        special: true
+        special read: "stream.read_i64::<BigEndian>().expect(\"Should be able to read i64 from stream\")"
+        special write: "stream.write_i64::<BigEndian>(data.{variable_name}).expect(\"Should be able to write i64 to stream\")"
         Data:
             -   value: i64
 
-    -   name: float
+    -   MC name: float
         Rust Equivalent: MCFloat
+        special: true
+        special read: "stream.read_f32::<BigEndian>().expect(\"Should be able to read f32 from stream\")"
+        special write: "stream.write_f32::<BigEndian>(data.{variable_name}).expect(\"Should be able to write f32 to stream\")"
         Data:
             -   value: f32
 
-    -   name: double
+    -   MC name: double
         Rust Equivalent: MCDouble
+        special: true
+        special read: "stream.read_f64::<BigEndian>().expect(\"Should be able to read f64 from stream\")"
+        special write: "stream.write_f64::<BigEndian>(data.{variable_name}).expect(\"Should be able to write f64 to stream\")"
         Data:
             -   value: f64
 
-    -   name: string8
+    -   MC name: string8
         Rust Equivalent: MCString8
+        special: true
+        special read: "let length = stream.read_i16::<BigEndian>().expect(\"Should be able to read length (i16) from stream\");\nlet mut buffer = vec![0u8; length as usize];\nstream.read_exact(&mut buffer).expect(\"Should be able to read length u8 from stream\")nlet text = String::from_utf8(buffer).expect(\"Should be able to convert array of utf8 bytes to string\");\n"
+        special write: "stream.write_i16::<BigEndian>(data.length as i16).expect(\"Should be able to write length i16 to stream\");\nstream.write_all(data.text.as_bytes()).expect(\"Should be able to write all bytes of utf8 to stream\");\n"
         Data:
             -   length: i16
-            -   value: StringUTF8
+            -   text: String
 
-    -   name: string16
+    -   MC name: string16
         Rust Equivalent: MCString16
+        special: true
+        special read: "let length = stream.read_i16::<BigEndian>().expect(\"Should be able to read length (i16) from stream\")\nlet mut buffer = vec![0u8; length as usize];\nstream.read_exact(&mut buffer).expect(\"Should be able to read exact number of bytes\");\nlet text = String::from_utf16(&buffer.chunks_exact(2).map(|character_bytes| u16::from_be_bytes([character_bytes[0], character_bytes[1]])).collect::<Vec<u16>>()).expect(\"Should be valid UCS2 data\");\n"
+        special write: "let encoded = vec![u16; data.length as usize].as_slice();\nlet length = ucs2::encode(&data.text, &mut encoded).unwrap();\nstream.write_i16::<BigEndian>(length as i16).unwrap();\nstream.write_all(&encoded).unwrap();\n"
         Data:
             -   length: i16
-            -   value: StringUCS2
+            -   text: String
 
-    -   name: bool
+    -   MC name: bool
         Rust Equivalent: MCBool
+        special: true
+        special read: "stream.read_u8().expect(\"Should be able to read u8 from stream\") == 1"
+        special write: "stream.write_u8(data.{variable_name} as u8).expect(\"Should be able to write bool (u8) to stream\")"
         Data:
             -   value: bool
 
-    -   name: metadata
+    -   MC name: metadata
         Rust Equivalent: MCMetadata
+        special: true
+        special read:
+        special write:
         Data:
-            -   metadata type: i8 #TODO: replace with struct of metadata types
+            -   metadata type: i8 #TODO: replace with enum of metadata types
             -   value: i8 #TODO: replace with correct type
 
-    -   name: MapChunk
+    -   MC name: MapChunk
         Rust Equivalent: MCMapChunk
+        special: true
+        special read:
+        special write:
         Data:
             -   length: i32 #Compressed Size
             -   Compressed Data: Vec<u8> #Compressed Data
 
-    -   name: BlockMetadataArray
+    -   MC name: BlockMetadataArray
         Rust Equivalent: MCBlockMetadataArray
         arg: "length: i32"
+        special: true
+        special read:
+        special write:
         Data:
             -   value: Vec<MCMetadata>
 
-    -   name: BlockTypeArray
+    -   MC name: BlockTypeArray
         Rust Equivalent: MCBlockTypeArray
         arg: "length: i32"
+        special: true
+        special read:
+        special write:
         Data:
             -   value: Vec<u8>
 
-    -   name: BlockCoordinateArray
+    -   MC name: BlockCoordinateArray
         Rust Equivalent: MCBlockCoordinateArray
         arg: "length: i32"
+        special: true
+        special read:
+        special write:
         Data:
             -   value: Vec<u8>
 
-    -   name: InventoryPayload
+    -   MC name: InventoryPayload
         Rust Equivalent: MCInventoryPayload
         arg: "length: i32"
+        special: true
+        special read:
+        special write:
         Data:
             -   value: Vec<MCItem>
 
-    -   name: BlockUpdateArray
+    -   MC name: BlockUpdateArray
         Rust Equivalent: MCBlockUpdateArray
         Data:
             -   length: i16 #Array Size
@@ -90,11 +143,21 @@ Types:
             -   Type Array: MCBlockTypeArray
             -   Metadata Array: MCBlockMetadataArray
 
-    -   name: ExplosionUpdateArray
+    -   MC name: ExplosionUpdateArray
         Rust Equivalent: MCExplosionUpdate
         Data:
             -   length: i32 #Record Count
             -   Records: MCBlockCoordinateArray
+
+    -   MC name: Item
+        Rust Equivalent: MCItem
+        special: true
+        special read:
+        special write:
+        Data:
+            -   Item ID: i16
+            -   Count: i8
+            -   Uses: i16
 
 Packets:
     -   name: Keep Alive
