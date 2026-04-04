@@ -1,5 +1,6 @@
 #special flag: true means that the contained data is elementary (cannot be expressed as a collection of simpler types), or requires special logic to read and write beyond simply reading the data value from stream.
-#if the special flag is set to true, format strings must be included for special read and special write that can be used to generate the required code 
+#if the special flag is set to true, format strings must be included for special read and special write that can be used to generate the required code
+#raw rust types should not be used as type if a suitable MC equivalent is defined. Read and write code for MC equivalents can be generated automatically, while rust types must be manually defined.
 Types:
     -   MC name: byte
         Rust Equivalent: MCByte
@@ -10,7 +11,7 @@ Types:
             -   value: i8
 
     -   MC name: ubyte
-        Rust Equipment: MCUByte
+        Rust Equivalent: MCUByte
         special: true
         special read: "stream.read_u8().expect(\"Should be able to read u8 from stream\")"
         special write: "stream.write_u8(data.{variable_name}).expect(\"Should be able to write u8 to stream\")"
@@ -86,8 +87,8 @@ Types:
     -   MC name: metadata
         Rust Equivalent: MCMetadata
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
             -   metadata type: i8 #TODO: replace with enum of metadata types
             -   value: i8 #TODO: replace with correct type
@@ -95,8 +96,8 @@ Types:
     -   MC name: MapChunk
         Rust Equivalent: MCMapChunk
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
             -   length: i32 #Compressed Size
             -   Compressed Data: Vec<u8> #Compressed Data
@@ -105,8 +106,8 @@ Types:
         Rust Equivalent: MCBlockMetadataArray
         arg: "length: i32"
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
             -   value: Vec<MCMetadata>
 
@@ -114,8 +115,8 @@ Types:
         Rust Equivalent: MCBlockTypeArray
         arg: "length: i32"
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
             -   value: Vec<u8>
 
@@ -123,8 +124,8 @@ Types:
         Rust Equivalent: MCBlockCoordinateArray
         arg: "length: i32"
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
             -   value: Vec<u8>
 
@@ -132,15 +133,15 @@ Types:
         Rust Equivalent: MCInventoryPayload
         arg: "length: i32"
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
             -   value: Vec<MCItem>
 
     -   MC name: BlockUpdateArray
         Rust Equivalent: MCBlockUpdateArray
         Data:
-            -   length: i16 #Array Size
+            -   length: MCShort #Array Size
             -   Coordinate Array: MCBlockCoordinateArray
             -   Type Array: MCBlockTypeArray
             -   Metadata Array: MCBlockMetadataArray
@@ -148,18 +149,18 @@ Types:
     -   MC name: ExplosionUpdateArray
         Rust Equivalent: MCExplosionUpdate
         Data:
-            -   length: i32 #Record Count
+            -   length: MCInt #Record Count
             -   Records: MCBlockCoordinateArray
 
     -   MC name: Item
         Rust Equivalent: MCItem
         special: true
-        special read:
-        special write:
+        special read: "let _ = 1; //PLACEHOLDER\n"
+        special write: "let _ = 1; //PLACEHOLDER\n"
         Data:
-            -   Item ID: i16
-            -   Count: i8
-            -   Uses: i16
+            -   Item ID: MCShort
+            -   Count: MCByte
+            -   Uses: MCShort
 
 Packets:
     -   name: Keep Alive
