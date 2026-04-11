@@ -5,56 +5,70 @@ Types:
     -   MC name: byte
         Rust Equivalent: MCByte
         special: true
-        special read: "let value = stream.read_i8().expect(\"Should be able to read i8 from stream\")"
-        special write: "stream.write_i8(data.{variable_name}).expect(\"Should be able to write i8 to stream\")"
+        special read: |
+            let value = stream.read_i8().expect("Should be able to read i8 from stream");
+        special write: |
+            stream.write_i8(data.value).expect("Should be able to write i8 to stream");
         Data:
             -   value: i8
 
     -   MC name: ubyte
         Rust Equivalent: MCUByte
         special: true
-        special read: "let value = stream.read_u8().expect(\"Should be able to read u8 from stream\")"
-        special write: "stream.write_u8(data.{variable_name}).expect(\"Should be able to write u8 to stream\")"
+        special read: |
+            let value = stream.read_u8().expect("Should be able to read u8 from stream");
+        special write: |
+            stream.write_u8(data.value).expect("Should be able to write u8 to stream");
         Data:
             -   value: u8
 
     -   MC name: short
         Rust Equivalent: MCShort
         special: true
-        special read: "let value = stream.read_i16::<BigEndian>().expect(\"Should be able to read i16 from stream\")"
-        special write: "stream.write_i16::<BigEndian>(data.{variable_name}).expect(\"Should be able to write i16 to stream\")"
+        special read: |
+            let value = stream.read_i16::<BigEndian>().expect("Should be able to read i16 from stream");
+        special write: |
+            stream.write_i16::<BigEndian>(data.value).expect("Should be able to write i16 to stream");
         Data:
             -   value: i16
 
     -   MC name: int
         Rust Equivalent: MCInt
         special: true
-        special read: "let value = stream.read_i32::<BigEndian>().expect(\"Should be able to read i32 from stream\")"
-        special write: "stream.write_i32::<BigEndian>(data.{variable_name}).expect(\"Should be able to write i32 to stream\")"
+        special read: |
+            let value = stream.read_i32::<BigEndian>().expect("Should be able to read i32 from stream");
+        special write: |
+            stream.write_i32::<BigEndian>(data.value).expect("Should be able to write i32 to stream");
         Data:
             -   value: i32
 
     -   MC name: long
         Rust Equivalent: MCLong
         special: true
-        special read: "let value = stream.read_i64::<BigEndian>().expect(\"Should be able to read i64 from stream\")"
-        special write: "stream.write_i64::<BigEndian>(data.{variable_name}).expect(\"Should be able to write i64 to stream\")"
+        special read: |
+            let value = stream.read_i64::<BigEndian>().expect("Should be able to read i64 from stream");
+        special write: |
+            stream.write_i64::<BigEndian>(data.value).expect("Should be able to write i64 to stream");
         Data:
             -   value: i64
 
     -   MC name: float
         Rust Equivalent: MCFloat
         special: true
-        special read: "let value = stream.read_f32::<BigEndian>().expect(\"Should be able to read f32 from stream\")"
-        special write: "stream.write_f32::<BigEndian>(data.{variable_name}).expect(\"Should be able to write f32 to stream\")"
+        special read: |
+            let value = stream.read_f32::<BigEndian>().expect("Should be able to read f32 from stream");
+        special write: |
+            stream.write_f32::<BigEndian>(data.value).expect("Should be able to write f32 to stream");
         Data:
             -   value: f32
 
     -   MC name: double
         Rust Equivalent: MCDouble
         special: true
-        special read: "let value = stream.read_f64::<BigEndian>().expect(\"Should be able to read f64 from stream\")"
-        special write: "stream.write_f64::<BigEndian>(data.{variable_name}).expect(\"Should be able to write f64 to stream\")"
+        special read: |
+            let value = stream.read_f64::<BigEndian>().expect("Should be able to read f64 from stream");
+        special write: |
+            stream.write_f64::<BigEndian>(data.value).expect("Should be able to write f64 to stream");
         Data:
             -   value: f64
 
@@ -67,7 +81,7 @@ Types:
             stream.read_exact(&mut buffer).expect("Should be able to read length u8 from stream");
             let text = String::from_utf8(buffer).expect("Should be able to convert array of utf8 bytes to string");
         special write: |
-            MCShort::write(stream, data.length)
+            MCShort::write(stream, data.length);
             stream.write_all(data.text.as_bytes()).expect("Should be able to write all bytes of utf8 to stream");
         Data:
             -   length: MCShort
@@ -82,10 +96,18 @@ Types:
             stream.read_exact(&mut buffer).expect("Should be able to read exact number of bytes");
             let text = String::from_utf16(&buffer.chunks_exact(2).map(|character_bytes| u16::from_be_bytes([character_bytes[0], character_bytes[1]])).collect::<Vec<u16>>()).expect("Should be valid UCS2 data");
         special write: |
-            let encoded = vec![0u16; data.length.value as usize].as_slice();
-            let length = ucs2::encode(&data.text, &mut encoded).unwrap();
-            MCShort::write(stream, length)
-            stream.write_all(&encoded).unwrap();
+            let mut encoded = vec![0u16; data.length.value as usize];
+            let _ = ucs2::encode(&data.text, &mut encoded).unwrap();
+            MCShort::write(stream, data.length);
+            stream
+                .write_all(
+                    encoded
+                        .iter()
+                        .flat_map(|&u| u.to_be_bytes())
+                        .collect::<Vec<u8>>()
+                        .as_slice()
+                )
+                .unwrap();
         Data:
             -   length: MCShort
             -   text: String
@@ -93,16 +115,18 @@ Types:
     -   MC name: bool
         Rust Equivalent: MCBool
         special: true
-        special read: "let value = stream.read_u8().expect(\"Should be able to read u8 from stream\") == 1"
-        special write: "stream.write_u8(data.{variable_name} as u8).expect(\"Should be able to write bool (u8) to stream\")"
+        special read: |
+            let value = stream.read_u8().expect("Should be able to read u8 from stream") == 1;
+        special write: |
+            stream.write_u8(data.value as u8).expect("Should be able to write bool (u8) to stream");
         Data:
             -   value: bool
 
     -   MC name: metadata
         Rust Equivalent: MCMetadata
         special: true
+        #TODO: remove improper reading, need more information on the format first
         special read: |
-            //TODO: remove improper reading, need more information on the format first
             let metadata_type = MCByte { value: 0 };
             let value = MCByte { value: 0 };
             loop {
@@ -127,7 +151,8 @@ Types:
                 }
             }
         #TODO: implement storing metadata properly
-        special write: "let _ = 1; //PLACEHOLDER\n"
+        special write: |
+            let _ = 1; //PLACEHOLDER
         Data:
             -   metadata type: MCByte #TODO: replace with enum of metadata types
                 #type = 0, read byte
@@ -148,7 +173,8 @@ Types:
             for _ in 0..length.value {
                 compressed_data.push(MCUByte::read(stream));
             }
-        special write: "let _ = 1; //PLACEHOLDER\n"
+        special write: |
+            let _ = 1; //PLACEHOLDER
         Data:
             -   length: MCInt #Compressed Size
             -   Compressed Data: Vec<MCUByte> #Compressed Data
@@ -208,7 +234,8 @@ Types:
                     )
                 }
             }
-        special write: "let _ = 1; //PLACEHOLDER\n"
+        special write: |
+            let _ = 1; //PLACEHOLDER
         Data:
             -   Count: MCShort
             -   Payload: Vec<MCItem>
@@ -221,26 +248,25 @@ Types:
             let mut coordinate_array: Vec<MCShort> = Vec::new();
             let mut type_array: Vec<MCByte> = Vec::new();
             let mut metadata_array: Vec<MCMetadata> = Vec::new();
-            let element_iter = 0..(length.value as usize);
-            for _ in element_iter {
+            for _ in 0..(length.value as usize) {
                 coordinate_array.push(MCShort::read(stream));
             }
-            for _ in element_iter {
+            for _ in 0..(length.value as usize) {
                 type_array.push(MCByte::read(stream));
             }
-            for _ in element_iter {
+            for _ in 0..(length.value as usize) {
                 metadata_array.push(MCMetadata::read(stream));
             }
         special write: |
-            MCShort::write(stream, data.length);
+            MCShort::write(stream, data.length.clone() );
             for i in 0..data.length.value {
-                MCShort::write(stream, data.coordinate_array[i]);
+                MCShort::write(stream, data.coordinate_array[i as usize].clone());
             }
             for i in 0..data.length.value {
-                MCByte::write(stream, data.type_array[i]);
+                MCByte::write(stream, data.type_array[i as usize].clone());
             }
             for i in 0..data.length.value {
-                MCMetadata::write(stream, data.metadata_array[i]);
+                MCMetadata::write(stream, data.metadata_array[i as usize].clone());
             }
         Data:
             -   length: MCShort #Array Size
@@ -264,7 +290,8 @@ Types:
             for _ in 0..length.value {
                 records.push(MCBlockCoordinate::read(stream))
             }
-        special write: "let _ = 1; //PLACEHOLDER\n"
+        special write: |
+            let _ = 1; //PLACEHOLDER
         Data:
             -   length: MCInt #Record Count
             -   Records: Vec<MCBlockCoordinate>
