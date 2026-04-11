@@ -1,4 +1,4 @@
-use std::{env, fs::{self, read}};
+use std::{env, fs};
 use yaml_rust::{Yaml, YamlLoader};
 
 fn main() {
@@ -42,6 +42,7 @@ fn generate_data_types(spec: Yaml) {
 		let contained_data = extract_contained_data(&mc_type);
 
 		//struct definition
+		output_code += "#[derive(Clone)]\n";
 		output_code += &format!("pub(crate) struct {rust_equivalent} {{\n");
 		for (data_name, data_type) in contained_data.iter() {
 			output_code += &format!(
@@ -80,24 +81,12 @@ fn generate_data_types(spec: Yaml) {
 		output_code += "		}\n";
 		output_code += "	}\n";
 
+		//insert empty line between read and write
+		output_code += "\n";
+
 		//write definition
 		output_code += "	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {\n";
-		for (data_name, data_type) in contained_data.iter() {
-			output_code += &format!(
-				"			{};\n",
-				write_generator(
-					data_type
-						.as_str()
-						.expect("Should be able to convert data type from yaml to str"),
-					&data_name
-						.as_str()
-						.expect("Should be able to convert data name from yamml to str")
-						.replace(" ", "_")
-						.to_lowercase(),
-					&mc_type
-				)
-			);
-		}
+		output_code += &write_generator(&mc_type);
 		//close write
 		output_code += "	}\n";
 
@@ -224,67 +213,50 @@ fn read_generator(mc_type: &Yaml) -> String {
 
 		for (data_name, data_type) in contained_data.iter() {
 			output_code += &format!(
-				"		let {} = {};\n",
+				"		let {} = {}::read(stream);\n",
 				data_name
 					.as_str()
 					.expect("Should be able to convert data name from yaml to str")
 					.replace(" ", "_")
 					.to_lowercase(),
-				format!(
-					"{}::read(stream);",
-					data_type
-						.as_str()
-						.expect("Should be able to convert value data type from yaml to str")
-				)
+				data_type
+					.as_str()
+					.expect("Should be able to convert value data type from yaml to str")
 			);
 		}
 
 		return output_code;
 	}
-	//may be of use later, but currently nonfunctional
-							// _ => if data_type.contains("Vec<") { //vec reading will fail if length not specified before (must be "length", not something else). Additionally, the type must be able to read from the stream using the syntax stream.read_TYPE::<BigEndian>()
-							// 		return "{ let mut temp = Vec::new();\nfor _ in 0..length {\n	temp.push(stream.read_".to_owned() + data_type.get(4..data_type.len()-1).expect("Should be able to extract vec type") + "().unwrap());\n}\n temp}";
-							// 	} else if vec!["MCString8", "MCString16", "MCMetadata", "MCMapChunk", "MCBlockMetadataArray", "MCBlockTypeArray", "MCBlockCoordinateArray", "MCInventoryPayload", "MCBlockUpdateArray", "MCExplosionUpdateArray", "MCItem"].contains(&data_type) {
-							// 		//some complex type, use its read method
-							// 		if let Some(arg) = mc_type_args(data_type) {
-							// 			return format!("{data_type}::read(stream, {arg}");
-							// 		} else {
-							// 			return data_type.to_string() + "::read(stream)";
-							// 		}
-							// 	} else {
-							// 		panic!("data_type should be one of the types in this match (was {:?})", data_type);
-							// 	}
 }
 
-fn write_generator(data_type: &str, variable_name: &str, mc_type: &Yaml) -> String {
+fn write_generator(mc_type: &Yaml) -> String {
 	if mc_type["special"].as_bool().unwrap_or(false) {
 		return mc_type["special write"]
 			.as_str()
 			.expect("If special flag set to true, special write code must be defined")
 			.to_owned()
-			.replace("{variable_name}", variable_name);
+			// .replace("{variable_name}", mc_type[]);
 	} else {
-		return format!("{data_type}::write(stream, data.{variable_name})");
+		let mut output_code = String::new();
+
+		let contained_data = extract_contained_data(&mc_type);
+		
+		for (variable_name, data_type) in contained_data.iter() {
+			output_code += &format!(
+				"		{}::write(stream, data.{});\n",
+				data_type
+					.as_str()
+					.expect("Should be able to convert data type from yaml to str"),
+				variable_name
+					.as_str()
+					.expect("Should be able to convert variable name from yaml to str")
+					.to_lowercase()
+					.replace(" ", "_")
+			);
+		}
+
+		return output_code;
 	}
-	//currently nonfunctional, may be useful later after modification
-							// match data_type {
-							// 		_ => if data_type.contains("Vec<") {
-							// 				// return format!("{{ stream.write_i16::<BigEndian>(data.{variable_name}.len() as i16).unwrap(); stream.write_all(data.{variable_name}.as_slice()).unwrap(); }}");
-							// 				let internal_type = data_type.get(4..data_type.len()-1).expect("Should be able to extract vec type");
-							// 				return format!(
-							// "{{
-							// 	stream.write_i16::<BigEndian>(data.{variable_name}.len() as i16).unwrap();
-							// 	for index in 0..data.{variable_name}.len() {{
-							// 		{};
-							// 	}}
-							// }}",
-							// write_generator(internal_type, &format!("{variable_name}[index].clone()")));
-							// 			} else if vec!["MCString8", "MCString16", "MCMetadata", "MCMapChunk", "MCBlockMetadataArray", "MCBlockTypeArray", "MCBlockCoordinateArray", "MCInventoryPayload", "MCBlockUpdateArray", "MCEplosionUpdateArray", "MCItem"].contains(&data_type) {
-							// 				return format!("{data_type}::write(stream, data.{variable_name})");
-							// 			}else {
-							// 				panic!("data_type should be one of the types in this match (was {:?})", data_type)
-							// 			}
-							// 	}.to_string()
 }
 
 //TODO: remove and replace with the definitions in the yaml
@@ -309,17 +281,6 @@ fn mc_type_to_rust(mc_type: &str) -> &str {
 		"ExplosionUpdateArray" => "MCExplosionUpdate",
 		"Item" => "MCItem",
 		_ => panic!("{} {}", "yaml should not specify data types outside those defined in mc_type_to_rust", mc_type),
-	}
-}
-
-//TODO: remove and replace with the definitions in the yaml
-fn mc_type_args(mc_type: &str) -> Option<&str> {
-	match mc_type {
-		"BlockMetadataArray" => Some("length"),
-		"BlockTypeArray" => Some("length"),
-		"BlockCoordinateArray" => Some("length"),
-		"InventoryPayload" => Some("length"),
-		_ => None
 	}
 }
 
