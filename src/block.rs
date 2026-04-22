@@ -1,9 +1,11 @@
+use crate::data_types::MCMetadata;
+
 pub(crate) struct Block {
-	block_type: String,
-	metadata: MCMetadata,
-	x: int,
-	y: int,
-	z: int,
+	pub(crate) block_type: String,
+	pub(crate) metadata: MCMetadata,
+	pub(crate) x: i32,
+	pub(crate) y: i32,
+	pub(crate) z: i32,
 }
 
 impl Block {
@@ -20,7 +22,7 @@ fn friendly_name_to_type(friendly_name: String) {
 	//TODO: implement	
 }
 
-enum Direction {
+pub(crate) enum Direction {
 	Down,
 	Up,
 	North,
