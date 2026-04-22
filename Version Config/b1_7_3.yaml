@@ -179,33 +179,6 @@ Types:
             -   length: MCInt #Compressed Size
             -   Compressed Data: Vec<MCUByte> #Compressed Data
 
-    # -   MC name: BlockMetadataArray
-    #     Rust Equivalent: MCBlockMetadataArray
-    #     arg: "length: i32"
-    #     special: true
-    #     special read: "let _ = 1; //PLACEHOLDER\n"
-    #     special write: "let _ = 1; //PLACEHOLDER\n"
-    #     Data:
-    #         -   value: Vec<MCMetadata>
-
-    # -   MC name: BlockTypeArray
-    #     Rust Equivalent: MCBlockTypeArray
-    #     arg: "length: i32"
-    #     special: true
-    #     special read: "let _ = 1; //PLACEHOLDER\n"
-    #     special write: "let _ = 1; //PLACEHOLDER\n"
-    #     Data:
-    #         -   value: Vec<u8>
-
-    # -   MC name: BlockCoordinateArray
-    #     Rust Equivalent: MCBlockCoordinateArray
-    #     arg: "length: i32"
-    #     special: true
-    #     special read: "let _ = 1; //PLACEHOLDER\n"
-    #     special write: "let _ = 1; //PLACEHOLDER\n"
-    #     Data:
-    #         -   value: Vec<u8>
-
     -   MC name: InventoryPayload
         Rust Equivalent: MCInventoryPayload
         special: true
@@ -747,3 +720,71 @@ Packets:
         id: 0xFF
         Data:
             -   Reason: string16
+
+Actions:
+    -   name: Join
+        packet conversion: |
+            let packets: Vec<Packets> = Vec::new();
+            let username = MCString16 {
+                length: MCShort { value: action.username.len() as i16 },
+                text: action.username,
+            };
+            packets.push(
+                Packets::Handshake(
+                    Handshake {
+                        username: username,
+                    }
+                )
+            );
+            packets.push(
+                Packets::LoginRequest(
+                    LoginRequest {
+                        protocol_version: MCInt { value: 14 },
+                        username: username,
+                        map_seed: MCLong { value: 0 as i64 },
+                        dimension: MCByte { value: 0 as i8 },
+                    }
+                )
+            );
+            return packets;
+
+    -   name: Walk
+        packet conversion: |
+            //TODO: implement stance properly
+            let packets: Vec<Packets> = Vec::new();
+            packets.push(
+                Packets::PlayerPosition(
+                    PlayerPosition {
+                        x: MCDouble { value: action.block.x as f64 },
+                        y: MCDouble { value: action.block.y as f64 },
+                        z: MCDouble { value: action.block.z as f64 },
+                        stance: MCDouble { value: (action.block.y + 1) as f64 },
+                        on_ground: MCBool { value: true },
+                    }
+                )
+            );
+            return packets;
+
+    -   name: Look
+        packet conversion: |
+            //TODO: implement
+            let packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: Jump
+        packet conversion: |
+            //TODO: implement
+            let packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: PlaceBlock
+        packet conversion: |
+            //TODO: implement
+            let packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: PlaceBlockAgainst
+        packet conversion: |
+            //TODO: implement
+            let packets: Vec<Packets> = Vec::new();
+            return packets;

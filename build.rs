@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::{env, fs, process::Output};
 use yaml_rust::{Yaml, YamlLoader};
 
 fn main() {
@@ -16,6 +16,7 @@ fn main() {
 
 	generate_data_types(version_spec["Types"].clone());
 	generate_packets(version_spec["Packets"].clone());
+	action_translation_generator(version_spec["Actions"].clone());
 }
 
 fn generate_data_types(spec: Yaml) {
@@ -46,7 +47,7 @@ fn generate_data_types(spec: Yaml) {
 		output_code += &format!("pub(crate) struct {rust_equivalent} {{\n");
 		for (data_name, data_type) in contained_data.iter() {
 			output_code += &format!(
-				"	{}: {},\n",
+				"	pub(crate) {}: {},\n",
 				data_name
 					.as_str()
 					.expect("Should be able to convert data name from yaml to str")
@@ -104,8 +105,12 @@ fn generate_packets(spec: Yaml) {
 	//imports
 	output_code += "use std::io::{Read, Write};\n";
 	output_code += "use crate::data_types::*;\n";
-	output_code += "use byteorder::WriteBytesExt;\n";
+	output_code += "use byteorder::WriteBytesExt;\n\n";
 
+	//insert enum of packets
+	output_code += &packet_enum_generator(spec.clone());
+
+	//insert packet definitions
 	for packet in spec {
 		//extracting data
 		let name = packet["name"]
@@ -198,6 +203,67 @@ fn generate_packets(spec: Yaml) {
 
 	//write to packets
 	fs::write("src/packets.rs", output_code).unwrap();
+}
+
+fn action_translation_generator(spec: Yaml) {
+	let mut output_code = String::new();
+	
+	//import all packets and data types because we don't know what we might need
+	output_code += "use crate::packets::*;\n";
+	output_code += "use crate::data_types::*;\n\n";
+	
+	for action in spec {
+		//extracting data
+		let name = action["name"]
+			.as_str()
+			.expect("Should be able to convert action name from yaml to str");
+		//TODO: clean this up
+		let conversion = action["packet conversion"]
+			.as_str()
+			.expect("Should be able to convert packet conversion from yaml to str");
+
+		//import the action we are implementing for
+		output_code += &format!("use crate::actions::{name};\n");
+
+		//impl block opening
+		output_code += &format!("impl {} {{\n", name);
+		
+		//insert packet conversion
+		output_code += &format!("	fn to_packets(action: {name}) -> Vec<Packets> {{\n");
+		output_code += conversion;
+
+		//function block closing
+		output_code += "	}\n";
+
+		//impl block closing
+		output_code += "}\n\n"
+	}
+
+	//write to packets
+	fs::write("src/action_translator.rs", output_code).unwrap();
+}
+
+fn packet_enum_generator(spec: Yaml) -> String {
+	let mut output_code = String::new();
+
+	//enum opening
+		output_code += "pub(crate) enum Packets {\n";
+
+	for packet in spec {
+		//extracting name
+		let name = packet["name"]
+			.as_str()
+			.expect("Should be able to convert packet name from yaml to str")
+			.replace(" ", "");
+
+		//insert packet
+		output_code += &format!("	{name}({name}),\n");
+	}
+
+	//enum closing
+	output_code += "}\n";
+
+	return output_code;
 }
 
 fn read_generator(mc_type: &Yaml) -> String {
