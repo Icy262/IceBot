@@ -28,6 +28,6 @@ impl Chunk {
 
 pub(crate) struct World {
 	//TODO: implement trimming the loaded blocks
-	blocks: HashMap<Chunk>, //for performance, we don't use a regular Block as these have too much overhead. instead, break the world into identically sized chunks which can store blocks more efficiently using palettes. use a hashmap so we can store an arbitrary number of chunks that may be far apart in the world.
+	blocks: HashMap<String, Chunk>, //for performance, we don't use a regular Block as these have too much overhead. instead, break the world into identically sized chunks which can store blocks more efficiently using palettes. use a hashmap so we can store an arbitrary number of chunks that may be far apart in the world. the hashmap key is formed as "x chunk coordinate,y chunk coordinate"
 	pub(crate) entities: Entity, //entities in the world
 }
