@@ -110,6 +110,9 @@ fn generate_packets(spec: Yaml) {
 	//insert enum of packets
 	output_code += &packet_enum_generator(spec.clone());
 
+	//insert packet reader
+	output_code += &read_packet_generator(spec.clone());
+
 	//insert packet definitions
 	for packet in spec {
 		//extracting data
@@ -247,7 +250,7 @@ fn packet_enum_generator(spec: Yaml) -> String {
 	let mut output_code = String::new();
 
 	//enum opening
-		output_code += "pub(crate) enum Packets {\n";
+	output_code += "pub(crate) enum Packets {\n";
 
 	for packet in spec {
 		//extracting name
@@ -261,7 +264,40 @@ fn packet_enum_generator(spec: Yaml) -> String {
 	}
 
 	//enum closing
-	output_code += "}\n";
+	output_code += "}\n\n";
+
+	return output_code;
+}
+
+fn read_packet_generator(spec: Yaml) -> String {
+	let mut output_code = String::new();
+
+	//function opening
+	output_code += "pub(crate) fn read_packet<R: Read>(stream: &mut R, id: u8) -> Option<Packets> {\n";
+
+	//match opening
+	output_code += "	let packet = match id {\n";
+
+	for packet in spec {
+		//extracting name
+		let name = packet["name"]
+			.as_str()
+			.expect("Should be able to convert packet name from yaml to str")
+			.replace(" ", "");
+
+		//insert packet
+		output_code += &format!("		{name}::ID => Packets::{name}({name}::read(stream)),\n");
+	}
+
+	//match closing
+	output_code += "		_ => return None,\n";
+	output_code += "	};\n\n";
+
+	//return result
+	output_code += "	return Some(packet);\n";
+
+	//function closing
+	output_code += "}\n\n";
 
 	return output_code;
 }
