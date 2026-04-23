@@ -724,7 +724,7 @@ Packets:
 Actions:
     -   name: Join
         packet conversion: |
-            let packets: Vec<Packets> = Vec::new();
+            let mut packets: Vec<Packets> = Vec::new();
             let username = MCString16 {
                 length: MCShort { value: action.username.len() as i16 },
                 text: action.username,
@@ -732,7 +732,7 @@ Actions:
             packets.push(
                 Packets::Handshake(
                     Handshake {
-                        username: username,
+                        username: username.clone(),
                     }
                 )
             );
@@ -751,7 +751,7 @@ Actions:
     -   name: Walk
         packet conversion: |
             //TODO: implement stance properly
-            let packets: Vec<Packets> = Vec::new();
+            let mut packets: Vec<Packets> = Vec::new();
             packets.push(
                 Packets::PlayerPosition(
                     PlayerPosition {
@@ -768,23 +768,23 @@ Actions:
     -   name: Look
         packet conversion: |
             //TODO: implement
-            let packets: Vec<Packets> = Vec::new();
+            let mut packets: Vec<Packets> = Vec::new();
             return packets;
 
     -   name: Jump
         packet conversion: |
             //TODO: implement
-            let packets: Vec<Packets> = Vec::new();
+            let mut packets: Vec<Packets> = Vec::new();
             return packets;
 
     -   name: PlaceBlock
         packet conversion: |
             //TODO: implement
-            let packets: Vec<Packets> = Vec::new();
+            let mut packets: Vec<Packets> = Vec::new();
             return packets;
 
     -   name: PlaceBlockAgainst
         packet conversion: |
             //TODO: implement
-            let packets: Vec<Packets> = Vec::new();
+            let mut packets: Vec<Packets> = Vec::new();
             return packets;
