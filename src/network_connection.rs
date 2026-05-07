@@ -1,14 +1,15 @@
+use crate::{packet_processor::process_packet, packets::read_packet, world::World};
 use std::net::TcpStream;
-use byteorder::ReadBytesExt;
-use crate::packets::read_packet;
 
-fn read_manager(stream: &mut TcpStream) {
+use byteorder::ReadBytesExt;
+
+pub(crate) fn read_manager(stream: &mut TcpStream) {
 	loop {
-		if let Ok(id) = stream.read_u8() {
-			let packet = read_packet(stream, id);
-			//TODO: do something with packet
+		let packet = read_packet(stream); //read the next packet
+		if packet.is_some() {
+			World::update_world_model(process_packet(packet.expect("Should not be None because we check that it is some")));
 		} else {
-			return;
+			panic!("Malformed packet");
 		}
 	}
 }
