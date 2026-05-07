@@ -5,5 +5,5 @@ pub(crate) struct Entity {
 	pub(crate) metadata: MCMetadata,
 	pub(crate) x: f64,
 	pub(crate) y: f64,
-	pub(crate) z:f64,
+	pub(crate) z: f64,
 }
