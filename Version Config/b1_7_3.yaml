@@ -92,7 +92,7 @@ Types:
         special: true
         special read: |
             let length = MCShort::read(stream);
-            let mut buffer = vec![0u8; length.value as usize];
+            let mut buffer = vec![0u8; 2 * length.value as usize];
             stream.read_exact(&mut buffer).expect("Should be able to read exact number of bytes");
             let text = String::from_utf16(&buffer.chunks_exact(2).map(|character_bytes| u16::from_be_bytes([character_bytes[0], character_bytes[1]])).collect::<Vec<u16>>()).expect("Should be valid UCS2 data");
         special write: |
@@ -127,14 +127,16 @@ Types:
         special: true
         #TODO: remove improper reading, need more information on the format first
         special read: |
-            let metadata_type = MCByte { value: 0 };
-            let value = MCByte { value: 0 };
+            //init
+            let metadata_type = MCUByte { value: 0 };
+            let value = MCUByte { value: 0 }; //TODO: implement storing value properly
             loop {
-                let metadata_type = MCByte::read(stream);
+                let metadata_type = MCUByte::read(stream);
                 if metadata_type.value == 127 {
                     break;
                 } else {
-                    match metadata_type.value {
+                    println!("Metadata: {}", metadata_type.value >> 5);
+                    match metadata_type.value >> 5 {
                         0 => { MCByte::read(stream); },
                         1 => { MCShort::read(stream); },
                         2 => { MCInt::read(stream); },
@@ -154,7 +156,7 @@ Types:
         special write: |
             let _ = 1; //PLACEHOLDER
         Data:
-            -   metadata type: MCByte #TODO: replace with enum of metadata types
+            -   metadata type: MCUByte #TODO: replace with enum of metadata types
                 #type = 0, read byte
                 #type = 1, read short
                 #type = 2, read int
@@ -162,7 +164,7 @@ Types:
                 #type = 4, read string16
                 #type = 5, read short, byte, short and save as item stack (id, count, damage)
                 #type = 6, read int, int, int and save as extra entity information
-            -   value: MCByte #TODO: replace with correct type
+            -   value: MCUByte #TODO: replace with correct type
 
     -   MC name: MapChunk
         Rust Equivalent: MCMapChunk
@@ -186,26 +188,9 @@ Types:
             let count = MCShort::read(stream);
             let mut payload = Vec::new();
             for _ in 0..count.value {
-                let item_id = MCShort::read(stream);
-                if item_id.value == -1 {
-                    payload.push(
-                        MCItem {
-                            item_id: item_id,
-                            count: MCByte { value: 0 },
-                            uses: MCShort { value: 0 }
-                        }
-                    )
-                } else {
-                    let count = MCByte::read(stream);
-                    let uses = MCShort::read(stream);
-                    payload.push(
-                        MCItem {
-                            item_id: item_id,
-                            count: count,
-                            uses: uses
-                        }
-                    )
-                }
+                payload.push(
+                    MCItem::read(stream)
+                )
             }
         special write: |
             let _ = 1; //PLACEHOLDER
@@ -271,6 +256,28 @@ Types:
 
     -   MC name: Item
         Rust Equivalent: MCItem
+        special: true
+        special read: |
+            let item_id = MCShort::read(stream);
+            
+            //the server will only send the count and uses if the id is not -1 (-1 means empty slot)
+            let count = if item_id.value != -1 {
+                MCByte::read(stream)
+            } else {
+                MCByte {
+                    value: 0,
+                }
+            };
+
+            let uses = if item_id.value != -1 {
+                MCShort::read(stream)
+            } else {
+                MCShort {
+                    value: 0,
+                }
+            };
+        special write: |
+            let _ = 1; //PLACEHOLDER
         Data:
             -   Item ID: MCShort
             -   Count: MCByte
@@ -302,7 +309,7 @@ Packets:
     -   name: Time Update
         id: 0x04
         Data:
-            Time: long
+            -   Time: long
 
     -   name: Entity Equipment
         id: 0x05
@@ -657,24 +664,26 @@ Packets:
             -   Right Click: bool
             -   Action Number: short
             -   Shift: bool
-            -   Item ID: short
-            -   Item Count: byte
-            -   Item Uses: short
+            -   Item: Item
+            # -   Item ID: short
+            # -   Item Count: byte
+            # -   Item Uses: short
 
     -   name: Set Slot
         id: 0x67
         Data:
             -   Window ID: byte
             -   Slot: short
-            -   Item ID: short
-            -   Item Count: byte
-            -   Item Uses: short
+            -   Item: Item
+            # -   Item ID: short
+            # -   Item Count: byte
+            # -   Item Uses: short
 
     -   name: Window Items
         id: 0x68
         Data:
             -   Window ID: byte
-            -   Count: short
+            # -   Count: short
             -   Payload: InventoryPayload
 
     -   name: Update Progress Bar
@@ -755,10 +764,10 @@ Actions:
             packets.push(
                 Packets::PlayerPosition(
                     PlayerPosition {
-                        x: MCDouble { value: action.block.x as f64 },
-                        y: MCDouble { value: action.block.y as f64 },
-                        z: MCDouble { value: action.block.z as f64 },
-                        stance: MCDouble { value: (action.block.y + 1) as f64 },
+                        x: MCDouble { value: action.position.x as f64 },
+                        y: MCDouble { value: action.position.y as f64 },
+                        z: MCDouble { value: action.position.z as f64 },
+                        stance: MCDouble { value: (action.position.y + 1) as f64 },
                         on_ground: MCBool { value: true },
                     }
                 )
@@ -788,3 +797,121 @@ Actions:
             //TODO: implement
             let mut packets: Vec<Packets> = Vec::new();
             return packets;
+
+#specifies how a packet should be processed. usually converts the packet into one of the enums in WorldUpdate. if not specified, the packet will simply be dropped
+Packet Processor:
+    #TODO: implement entity and inventory related packet processing
+    -   name: Map Chunk
+        packet processing: |
+            Packets::MapChunk(packet) => {
+                //unwrap the compressed data out of MCUBytes and inflate it using zlib
+                let unwraped_compressed = packet.map_chunk.compressed_data.iter().map(|mcbyte| mcbyte.value).collect::<Vec<u8>>();
+                let mut decoder = ZlibDecoder::new(unwraped_compressed.as_slice());
+                let mut decompressed = Vec::new();
+                decoder.read_to_end(&mut decompressed);
+
+                //get the dimensions of the region and the total number of blocks contained in it
+                let size_x = packet.size_x.value as usize + 1;
+                let size_y = packet.size_y.value as usize + 1;
+                let size_z = packet.size_z.value as usize + 1;
+                let num_blocks = size_x * size_y * size_z;
+
+                //format the data into vecs of block types, metadata, light levels, and sky light
+                let block_types: &[u8] = &decompressed[0..num_blocks];
+                let block_metadata: &[u8] = &decompressed[num_blocks..(3*num_blocks/2) as usize];
+                
+                //unused
+                //TODO: implement block and sky light levels
+                let block_light = &decompressed[(3*num_blocks/2) as usize .. (2 * num_blocks) as usize];
+                let sky_light = &decompressed[(2 * num_blocks) as usize .. (5*num_blocks/2) as usize];
+
+                //generate the palette and local id array
+                //TODO: implement metadata
+                let mut palette: Vec<String> = Vec::new();
+                let mut local_ids = vec![vec![vec![0u8; size_z]; size_y]; size_x];
+                for current_x in 0..size_x {
+                    for current_y in 0..size_y {
+                        for current_z in 0..size_z {
+                            //get index of block type in array
+                            let index = current_y + (current_z * size_y) + (current_x * size_y * size_z); //see https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Multi_Block_Change_(0x34) for reason on why this formula works
+
+                            //get block type
+                            let block_type = block_types[index].to_string();
+
+                            //convert to local block id
+                            let mut local_block_type = palette.iter().position(|block| *block == block_type);
+
+                            //if Some, then it was in the palette and we have the local id, if None, we should push the block type to the palette and use the index of the final element as the local id
+                            if local_block_type.is_none() {
+                                palette.push(block_type);
+                                local_block_type = Some(palette.len() - 1)
+                            }
+
+                            //push the local id to the current position
+                            local_ids[current_x][current_y][current_z] = local_block_type.expect("Should be impossible to be None because we check if local_block_type is None to see if it is in the palette") as u8;
+                        }
+                    }
+                } 
+
+                WorldUpdate::BlockRegion(
+                    Region {
+                        start_x: packet.x.value as i32,
+                        start_y: packet.y.value as i32,
+                        start_z: packet.z.value as i32,
+                        size_x: size_x as i32,
+                        size_y: size_y as i32,
+                        size_z: size_z as i32,
+                        palette: palette,
+                        local_ids: local_ids,
+                    }
+                )
+            },
+
+    -   name: Multi Block Change
+        packet processing: |
+            Packets::MultiBlockChange(packet) => {
+                let mut blocks: Vec<Block> = Vec::new();
+                for i in 0..packet.block_update_array.length.value as usize {
+                    blocks.push(
+                        Block {
+                            block_type: packet.block_update_array.type_array[i].value.to_string(),
+                            metadata: packet.block_update_array.metadata_array[i].clone(),
+                            position: Coordinates {
+                                //bit shift and mask to isolate the important bits. top 4 bits are x, next 4 are z, final 8 are y
+                                x: (packet.block_update_array.coordinate_array[i].value >> 12) as i32,
+                                y: (packet.block_update_array.coordinate_array[i].value << 8) as i32,
+                                z: ((packet.block_update_array.coordinate_array[i].value >> 8) & 0b1111) as i32,
+                            },
+                        }
+                    )
+                }
+
+                WorldUpdate::MultiBlock(blocks)
+            },
+
+    -   name: Block Change
+        #TODO: implement proper metadata processing
+        packet processing: |
+            Packets::BlockChange(packet) => {
+                WorldUpdate::SingleBlock(
+                    Block {
+                        block_type: packet.block_type.value.to_string(),
+                        metadata: MCMetadata {
+                            metadata_type: MCUByte {
+                                value: 0
+                            },
+                            value: MCUByte {
+                                value: 0
+                            },
+                        },
+                        position: Coordinates {
+                            x: packet.x.value as i32,
+                            y: packet.y.value as i32,
+                            z: packet.x.value as i32
+                        }
+                    }
+                )
+            },
+
+    # -   name: Explosion
+    #     packet processing: |
