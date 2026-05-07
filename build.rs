@@ -1,4 +1,4 @@
-use std::{env, fs, process::Output};
+use std::{env, fs};
 use yaml_rust::{Yaml, YamlLoader};
 
 fn main() {
@@ -16,12 +16,13 @@ fn main() {
 
 	generate_data_types(version_spec["Types"].clone());
 	generate_packets(version_spec["Packets"].clone());
-	action_translation_generator(version_spec["Actions"].clone());
+	generate_action_translation(version_spec["Actions"].clone());
+	generate_packet_processor(version_spec["Packet Processor"].clone());
 }
 
 fn generate_data_types(spec: Yaml) {
 	let mut output_code = String::new();
-	
+
 	//imports
 	output_code += "use std::io::{Read, Write};\n";
 	output_code += "use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};\n";
@@ -37,9 +38,7 @@ fn generate_data_types(spec: Yaml) {
 			.as_str()
 			.expect("All data types should contain a rust equivalent");
 		//if the data type is an elementary data type, or requires complex logic to read and write, allows for a manual definition to be specified
-		let _special = mc_type["special"]
-			.as_bool()
-			.unwrap_or(false);
+		let _special = mc_type["special"].as_bool().unwrap_or(false);
 		let contained_data = extract_contained_data(&mc_type);
 
 		//struct definition
@@ -104,14 +103,16 @@ fn generate_packets(spec: Yaml) {
 
 	//imports
 	output_code += "use std::io::{Read, Write};\n";
-	output_code += "use crate::data_types::*;\n";
-	output_code += "use byteorder::WriteBytesExt;\n\n";
+	output_code += "use crate::data_types::*;\n\n";
 
 	//insert enum of packets
 	output_code += &packet_enum_generator(spec.clone());
 
 	//insert packet reader
-	output_code += &read_packet_generator(spec.clone());
+	output_code += &generate_packet_read(spec.clone());
+
+	//insert packet writer
+	output_code += &generate_packet_write(spec.clone());
 
 	//insert packet definitions
 	for packet in spec {
@@ -158,7 +159,7 @@ fn generate_packets(spec: Yaml) {
 
 		//impl block opening
 		output_code += &format!("impl {} {{\n", name);
-		
+
 		//set packet id as const
 		output_code += &format!("	const ID: u8 = {id};\n");
 
@@ -185,7 +186,7 @@ fn generate_packets(spec: Yaml) {
 		//Define write
 		output_code += "	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {\n";
 		//write packet id
-		output_code += "		stream.write_u8(Self::ID).expect(\"Should be able to write u8, packet ID to stream\");\n";
+		output_code += "		MCUByte::write(stream, MCUByte { value: Self::ID});\n";
 		for (field, data_type) in payload.iter() {
 			output_code += &format!(
 				"		{}::write(stream, data.{});\n",
@@ -208,13 +209,13 @@ fn generate_packets(spec: Yaml) {
 	fs::write("src/packets.rs", output_code).unwrap();
 }
 
-fn action_translation_generator(spec: Yaml) {
+fn generate_action_translation(spec: Yaml) {
 	let mut output_code = String::new();
-	
+
 	//import all packets and data types because we don't know what we might need
 	output_code += "use crate::packets::*;\n";
 	output_code += "use crate::data_types::*;\n\n";
-	
+
 	for action in spec {
 		//extracting data
 		let name = action["name"]
@@ -230,9 +231,9 @@ fn action_translation_generator(spec: Yaml) {
 
 		//impl block opening
 		output_code += &format!("impl {} {{\n", name);
-		
+
 		//insert packet conversion
-		output_code += &format!("	fn to_packets(action: {name}) -> Vec<Packets> {{\n");
+		output_code += &format!("	pub(crate) fn to_packets(action: {name}) -> Vec<Packets> {{\n");
 		output_code += conversion;
 
 		//function block closing
@@ -242,8 +243,51 @@ fn action_translation_generator(spec: Yaml) {
 		output_code += "}\n\n"
 	}
 
-	//write to packets
+	//write to action translator
 	fs::write("src/action_translator.rs", output_code).unwrap();
+}
+
+fn generate_packet_processor(spec: Yaml) {
+	let mut output_code = String::new();
+
+	//import the types we need
+	output_code += "use crate::block::Block;\n";
+	output_code += "use crate::world::WorldUpdate;\n";
+	output_code += "use crate::packets::Packets;\n";
+	output_code += "use crate::block::Coordinates;\n";
+	output_code += "use crate::data_types::MCUByte;\n";
+	output_code += "use crate::data_types::MCMetadata;\n";
+	output_code += "use std::io::Read;\n";
+	output_code += "use crate::world::Region;\n";
+	output_code += "use flate2::read::ZlibDecoder;\n\n";
+
+	//function opening
+	output_code += "pub(crate) fn process_packet(packet: Packets) -> WorldUpdate {\n";
+
+	//match opening
+	output_code += "	return match packet {\n";
+
+	for packet in spec {
+		//extracting processing code
+		let packet_processing_code = packet["packet processing"]
+			.as_str()
+			.expect("Should be able to convert packet processing code from yaml to str");
+
+		//insert code
+		output_code += packet_processing_code;
+	}
+
+	//default case for unspecified packets
+	output_code += "		_ => WorldUpdate::NoEffect,\n";
+
+	//match closing
+	output_code += "	};\n";
+
+	//function closing
+	output_code += "}\n\n";
+
+	//write to packet_processor
+	fs::write("src/packet_processor.rs", output_code).unwrap();
 }
 
 fn packet_enum_generator(spec: Yaml) -> String {
@@ -269,11 +313,15 @@ fn packet_enum_generator(spec: Yaml) -> String {
 	return output_code;
 }
 
-fn read_packet_generator(spec: Yaml) -> String {
+fn generate_packet_read(spec: Yaml) -> String {
 	let mut output_code = String::new();
 
 	//function opening
-	output_code += "pub(crate) fn read_packet<R: Read>(stream: &mut R, id: u8) -> Option<Packets> {\n";
+	output_code += "pub(crate) fn read_packet<R: Read>(stream: &mut R) -> Option<Packets> {\n";
+
+	//get packet id
+	output_code += "	let id = MCUByte::read(stream).value;\n\n";
+	output_code += "	println!(\"{id}\");";
 
 	//match opening
 	output_code += "	let packet = match id {\n";
@@ -295,6 +343,35 @@ fn read_packet_generator(spec: Yaml) -> String {
 
 	//return result
 	output_code += "	return Some(packet);\n";
+
+	//function closing
+	output_code += "}\n\n";
+
+	return output_code;
+}
+
+fn generate_packet_write(spec: Yaml) -> String {
+	let mut output_code = String::new();
+
+	//function opening
+	output_code += "pub(crate) fn write_packet<W: Write>(stream: &mut W, packet: Packets) {\n";
+
+	//match opening
+	output_code += "	match packet {\n";
+
+	for packet in spec {
+		//extracting name
+		let name = packet["name"]
+			.as_str()
+			.expect("Should be able to convert packet name from yaml to str")
+			.replace(" ", "");
+
+		//insert packet
+		output_code += &format!("		Packets::{name}(packet) => {name}::write(stream, packet),\n");
+	}
+
+	//match closing
+	output_code += "	};\n\n";
 
 	//function closing
 	output_code += "}\n\n";
@@ -336,13 +413,13 @@ fn write_generator(mc_type: &Yaml) -> String {
 		return mc_type["special write"]
 			.as_str()
 			.expect("If special flag set to true, special write code must be defined")
-			.to_owned()
-			// .replace("{variable_name}", mc_type[]);
+			.to_owned();
+		// .replace("{variable_name}", mc_type[]);
 	} else {
 		let mut output_code = String::new();
 
 		let contained_data = extract_contained_data(&mc_type);
-		
+
 		for (variable_name, data_type) in contained_data.iter() {
 			output_code += &format!(
 				"		{}::write(stream, data.{});\n",
@@ -382,7 +459,10 @@ fn mc_type_to_rust(mc_type: &str) -> &str {
 		"BlockUpdateArray" => "MCBlockUpdateArray",
 		"ExplosionUpdateArray" => "MCExplosionUpdate",
 		"Item" => "MCItem",
-		_ => panic!("{} {}", "yaml should not specify data types outside those defined in mc_type_to_rust", mc_type),
+		_ => panic!(
+			"{} {}",
+			"yaml should not specify data types outside those defined in mc_type_to_rust", mc_type
+		),
 	}
 }
 
