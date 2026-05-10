@@ -79,7 +79,11 @@ Packets::MultiBlockChange(packet) => {
         blocks.push(
             Block {
                 block_type: packet.block_update_array.type_array[i].value.to_string(),
-                metadata: packet.block_update_array.metadata_array[i].clone(),
+                //metadata: packet.block_update_array.metadata_array[i].clone(),
+                metadata: MCMetadata {
+                    metadata_type: MCUByte { value: 0 }, //always a block metadata
+                    value: MCUByte { value: packet.block_update_array.metadata_array[i].value },
+                },
                 position: Coordinates {
                     //bit shift and mask to isolate the important bits. top 4 bits are x, next 4 are z, final 8 are y
                     x: (packet.block_update_array.coordinate_array[i].value >> 12) as i32,

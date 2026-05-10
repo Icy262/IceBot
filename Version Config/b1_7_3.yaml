@@ -205,7 +205,8 @@ Types:
             let length = MCShort::read(stream);
             let mut coordinate_array: Vec<MCShort> = Vec::new();
             let mut type_array: Vec<MCByte> = Vec::new();
-            let mut metadata_array: Vec<MCMetadata> = Vec::new();
+            //let mut metadata_array: Vec<MCMetadata> = Vec::new();
+            let mut metadata_array: Vec<MCUByte> = Vec::new();
             for _ in 0..(length.value as usize) {
                 coordinate_array.push(MCShort::read(stream));
             }
@@ -213,8 +214,11 @@ Types:
                 type_array.push(MCByte::read(stream));
             }
             for _ in 0..(length.value as usize) {
-                metadata_array.push(MCMetadata::read(stream));
+                metadata_array.push(MCUByte::read(stream));
             }
+            //for _ in 0..(length.value as usize) {
+            //    metadata_array.push(MCMetadata::read(stream));
+            //}
         special write: |
             MCShort::write(stream, data.length.clone() );
             for i in 0..data.length.value {
@@ -224,13 +228,16 @@ Types:
                 MCByte::write(stream, data.type_array[i as usize].clone());
             }
             for i in 0..data.length.value {
-                MCMetadata::write(stream, data.metadata_array[i as usize].clone());
+                MCUByte::write(stream, data.metadata_array[i as usize].clone());
             }
+            //for i in 0..data.length.value {
+            //    MCMetadata::write(stream, data.metadata_array[i as usize].clone());
+            //}
         Data:
             -   length: MCShort #Array Size
             -   Coordinate Array: Vec<MCShort>
             -   Type Array: Vec<MCByte>
-            -   Metadata Array: Vec<MCMetadata>
+            -   Metadata Array: Vec<MCUByte>
 
     -   MC name: BlockCoordinate
         Rust Equivalent: MCBlockCoordinate
@@ -761,17 +768,27 @@ Actions:
         packet conversion: |
             //TODO: implement stance properly
             let mut packets: Vec<Packets> = Vec::new();
-            packets.push(
-                Packets::PlayerPosition(
-                    PlayerPosition {
-                        x: MCDouble { value: action.position.x as f64 },
-                        y: MCDouble { value: action.position.y as f64 },
-                        z: MCDouble { value: action.position.z as f64 },
-                        stance: MCDouble { value: (action.position.y + 1) as f64 },
-                        on_ground: MCBool { value: true },
-                    }
+            use crate::bot::PLAYER;
+            PLAYER.with_borrow(|player| {
+                packets.push(
+                    Packets::PlayerPosition(
+                        //PlayerPosition {
+                        //    x: MCDouble { value: action.position.x as f64 },
+                        //    y: MCDouble { value: action.position.y as f64 },
+                        //    z: MCDouble { value: action.position.z as f64 },
+                        //    stance: MCDouble { value: (action.position.y + 1) as f64 },
+                        //    on_ground: MCBool { value: true },
+                        //}
+                        PlayerPosition {
+                            x: MCDouble { value: player.x + -0.2 * player.facing.sin() },
+                            y: MCDouble { value: player.y },
+                            z: MCDouble { value: player.z + 0.2 * player.facing.cos() },
+                            stance: MCDouble { value: player.y as f64 + 1.62 },
+                            on_ground: MCBool { value: true },
+                        }
+                    )
                 )
-            );
+            });
             return packets;
 
     -   name: Look
@@ -875,7 +892,11 @@ Packet Processor:
                     blocks.push(
                         Block {
                             block_type: packet.block_update_array.type_array[i].value.to_string(),
-                            metadata: packet.block_update_array.metadata_array[i].clone(),
+                            //metadata: packet.block_update_array.metadata_array[i].clone(),
+                            metadata: MCMetadata {
+                                metadata_type: MCUByte { value: 0 }, //always a block metadata
+                                value: MCUByte { value: packet.block_update_array.metadata_array[i].value },
+                            },
                             position: Coordinates {
                                 //bit shift and mask to isolate the important bits. top 4 bits are x, next 4 are z, final 8 are y
                                 x: (packet.block_update_array.coordinate_array[i].value >> 12) as i32,
