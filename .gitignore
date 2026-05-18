@@ -4,6 +4,7 @@ debug
 target
 src/data_types.rs
 src/packets.rs
+src/packet_processor.rs
 src/action_translator.rs
 src/movement_translator.rs
 
