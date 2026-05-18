@@ -1,10 +1,12 @@
 use crate::block::{Block, Coordinates};
 use crate::data_types::{MCUByte, MCMetadata};
-use crate::entity::Entity;
+use crate::entity::{Entity, EntityPositionAndLook};
+use crate::bot::PLAYER;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 use std::sync::LazyLock;
 use std::mem::drop;
+use std::sync::mpsc::Sender;
 
 pub(crate) static WORLD_MODEL: LazyLock<World> = LazyLock::new(|| World {
 	chunks: Mutex::new(HashMap::new()),
@@ -43,7 +45,7 @@ pub(crate) struct World {
 }
 
 impl World {
-	pub(crate) fn update_world_model(update: WorldUpdate) {
+	pub(crate) fn update_world_model(update: WorldUpdate, tx: Sender<WorldUpdate>) {
 		match update {
 			WorldUpdate::SingleBlock(block) => {
 				//get a lock on the chunk
@@ -74,7 +76,7 @@ impl World {
 			WorldUpdate::MultiBlock(blocks) => {
 				blocks
 					.into_iter()
-					.for_each(|block| Self::update_world_model(WorldUpdate::SingleBlock(block)));
+					.for_each(|block| Self::update_world_model(WorldUpdate::SingleBlock(block), tx.clone()));
 			},
 			WorldUpdate::BlockRegion(region) => {
 				let chunk_x = region.start_x / 16;
@@ -147,6 +149,9 @@ impl World {
 			//TODO: implement for entities
 			WorldUpdate::SingleEntity(entity) => (),
 			WorldUpdate::MultiEntity(entity) => (),
+			WorldUpdate::PlayerUpdate(position_and_look) => {
+				let _ = tx.send(WorldUpdate::PlayerUpdate(position_and_look));
+			},
 			WorldUpdate::NoEffect => (),
 		}
 	}
@@ -217,9 +222,9 @@ impl World {
 	fn global_to_local_coordinates(global_coordinates: &Coordinates) -> Coordinates {
 		//get convert to local coordinates
 		Coordinates {		
-			x: (((global_coordinates.x % 16) + 16) % 16), //mod 16 to get the position relative to the chunk boundaries, add 16 to ensure it is positive, then mod again to make sure it falls within the chunk
+			x: global_coordinates.x & 15, //and with 15 to get the (positive) remainder for the global coordinate, which is the coordinate relative to the orgin of the chunk
 			y: global_coordinates.y,
-			z: (((global_coordinates.z % 16) + 16) % 16),
+			z: global_coordinates.z & 15,
 		}
 	}
 
@@ -235,5 +240,6 @@ pub(crate) enum WorldUpdate {
 	BlockRegion(Region),
 	SingleEntity(Entity),
 	MultiEntity(Vec<Entity>),
+	PlayerUpdate(EntityPositionAndLook),
 	NoEffect,
 }
