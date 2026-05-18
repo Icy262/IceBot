@@ -17,6 +17,7 @@ fn main() {
 	generate_data_types(version_spec["Types"].clone());
 	generate_packets(version_spec["Packets"].clone());
 	generate_action_translation(version_spec["Actions"].clone());
+	generate_movement_translation(version_spec["Movements"].clone());
 	generate_packet_processor(version_spec["Packet Processor"].clone());
 }
 
@@ -216,6 +217,31 @@ fn generate_action_translation(spec: Yaml) {
 	output_code += "use crate::packets::*;\n";
 	output_code += "use crate::data_types::*;\n\n";
 
+	//generate an Actions enum
+	output_code += "pub(crate) enum Actions {\n";
+	for action in spec.clone() {
+		let name = action["name"]
+			.as_str()
+			.expect("Should be able to convert action name from yaml to str");
+
+		output_code += &format!("	{name}({name}),\n");
+	}
+	output_code += "}\n\n";
+
+	//generate a to_packets method for the Actions enum
+	output_code += "pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {\n";
+	output_code += "	match action {\n";
+	for action in spec.clone() {
+		let name = action["name"]
+			.as_str()
+			.expect("Should be able to convert action name from yaml to str");
+
+		output_code += &format!("		Actions::{name}(action) => {name}::to_packets(action),\n")
+	}
+	output_code += "	}\n";
+	output_code += "}\n\n";
+
+	//generate the to_packets for each individual action
 	for action in spec {
 		//extracting data
 		let name = action["name"]
@@ -247,6 +273,71 @@ fn generate_action_translation(spec: Yaml) {
 	fs::write("src/action_translator.rs", output_code).unwrap();
 }
 
+fn generate_movement_translation(spec: Yaml) {
+	let mut output_code = String::new();
+
+	//import all packets and data types because we don't know what we might need
+	output_code += "use crate::packets::*;\n";
+	output_code += "use crate::bot::PLAYER;\n";
+	output_code += "use crate::physics::process_motion;\n";
+	output_code += "use crate::data_types::*;\n\n";
+
+	//generate an Movements enum
+	output_code += "pub(crate) enum Movements {\n";
+	for movement in spec.clone() {
+		let name = movement["name"]
+			.as_str()
+			.expect("Should be able to convert movement name from yaml to str");
+
+		output_code += &format!("	{name}({name}),\n");
+	}
+	output_code += "}\n\n";
+
+	//generate a to_packets method for the Movements enum
+	output_code += "pub(crate) fn to_packets(movement: Movements) -> Vec<Packets> {\n";
+	output_code += "	match movement {\n";
+	for movement in spec.clone() {
+		let name = movement["name"]
+			.as_str()
+			.expect("Should be able to convert movement name from yaml to str");
+
+		output_code += &format!("		Movements::{name}(movement) => {name}::to_packets(movement),\n")
+	}
+	output_code += "	}\n";
+	output_code += "}\n\n";
+
+	//generate the to_packets for each individual movement
+	for movement in spec {
+		//extracting data
+		let name = movement["name"]
+			.as_str()
+			.expect("Should be able to convert movement name from yaml to str");
+		//TODO: clean this up
+		let conversion = movement["packet conversion"]
+			.as_str()
+			.expect("Should be able to convert packet conversion from yaml to str");
+
+		//import the movement we are implementing for
+		output_code += &format!("use crate::movements::{name};\n");
+
+		//impl block opening
+		output_code += &format!("impl {} {{\n", name);
+
+		//insert packet conversion
+		output_code += &format!("	pub(crate) fn to_packets(movement: {name}) -> Vec<Packets> {{\n");
+		output_code += conversion;
+
+		//function block closing
+		output_code += "	}\n";
+
+		//impl block closing
+		output_code += "}\n\n"
+	}
+
+	//write to movement translator
+	fs::write("src/movement_translator.rs", output_code).unwrap();
+}
+
 fn generate_packet_processor(spec: Yaml) {
 	let mut output_code = String::new();
 
@@ -255,8 +346,8 @@ fn generate_packet_processor(spec: Yaml) {
 	output_code += "use crate::world::WorldUpdate;\n";
 	output_code += "use crate::packets::Packets;\n";
 	output_code += "use crate::block::Coordinates;\n";
-	output_code += "use crate::data_types::MCUByte;\n";
-	output_code += "use crate::data_types::MCMetadata;\n";
+	output_code += "use crate::data_types::{MCByte, MCUByte, MCMetadata, MCDouble, MCBool};\n";
+	output_code += "use crate::entity::EntityPositionAndLook;\n";
 	output_code += "use std::io::Read;\n";
 	output_code += "use crate::world::Region;\n";
 	output_code += "use flate2::read::ZlibDecoder;\n\n";
@@ -268,13 +359,17 @@ fn generate_packet_processor(spec: Yaml) {
 	output_code += "	return match packet {\n";
 
 	for packet in spec {
+		let name = packet["name"]
+			.as_str()
+			.expect("Should be able to convert packet name from yaml to str")
+			.replace(" ", "");
 		//extracting processing code
 		let packet_processing_code = packet["packet processing"]
 			.as_str()
 			.expect("Should be able to convert packet processing code from yaml to str");
 
 		//insert code
-		output_code += packet_processing_code;
+		output_code += &format!("Packets::{name}(packet) => {{\n{packet_processing_code}\n}},\n");
 	}
 
 	//default case for unspecified packets
@@ -321,7 +416,6 @@ fn generate_packet_read(spec: Yaml) -> String {
 
 	//get packet id
 	output_code += "	let id = MCUByte::read(stream).value;\n\n";
-	output_code += "	println!(\"{id}\");";
 
 	//match opening
 	output_code += "	let packet = match id {\n";
