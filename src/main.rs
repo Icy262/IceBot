@@ -17,6 +17,8 @@ mod bot;
 mod movements;
 mod movement_translator;
 mod physics;
+mod task;
+mod behaviour;
 
 use crate::world::World;
 use crate::block::Block;
@@ -27,14 +29,6 @@ use crate::block::Coordinates;
 fn main() {
 	thread::spawn(move || bot::bot_main("Icebot".to_string(), "localhost:25565".to_string()));
 	loop {
-		 println!("Blocks in world at 0, y, 0 are:");
-		 for i in 0 ..= 127 {
-		 	let block = World::get_block(block::Coordinates { x:0, y: i, z: 0 }).unwrap_or_else(|| Block { block_type: "Error".to_string(), metadata: MCMetadata { metadata_type: MCUByte {value:0}, value: MCUByte { value: 0 }}, position: Coordinates { x:0,y: i,z:0}});
-			if block.block_type != "Error"{
-				println!("{i}: {}", block.block_type);
-			}
-		 }
-
 		std::thread::sleep(time::Duration::from_millis(100));
 	}
 	println!("Complete!");
