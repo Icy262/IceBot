@@ -4,6 +4,24 @@ use crate::block::{Block, Coordinates, Direction};
 use crate::action_translator;
 use crate::packets::write_packet;
 
+pub(crate) enum Actions {
+	Join(Join),
+	DoNothing(DoNothing),
+	Look(Look),
+	PlaceBlock(PlaceBlock),
+	PlaceBlockAgainst(PlaceBlockAgainst),
+}
+
+pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {
+	match action {
+		Actions::Join(action) => Join::to_packets(action),
+		Actions::DoNothing(action) => DoNothing::to_packets(action),
+		Actions::Look(action) => Look::to_packets(action),
+		Actions::PlaceBlock(action) => PlaceBlock::to_packets(action),
+		Actions::PlaceBlockAgainst(action) => PlaceBlockAgainst::to_packets(action),
+	}
+}
+
 pub(crate) fn do_action(action: action_translator::Actions, server_connection: &mut TcpStream) {
 	let packets = action_translator::to_packets(action);
 	for packet in packets {
@@ -14,6 +32,9 @@ pub(crate) fn do_action(action: action_translator::Actions, server_connection: &
 //TODO: implement support for online servers
 pub(crate) struct Join {
 	pub(crate) username: String, //player username
+}
+
+pub(crate) struct DoNothing {
 }
 
 pub(crate) struct Look {
