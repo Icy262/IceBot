@@ -214,32 +214,9 @@ fn generate_action_translation(spec: Yaml) {
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
+	output_code += "use crate::actions::Actions;\n";
 	output_code += "use crate::packets::*;\n";
 	output_code += "use crate::data_types::*;\n\n";
-
-	//generate an Actions enum
-	output_code += "pub(crate) enum Actions {\n";
-	for action in spec.clone() {
-		let name = action["name"]
-			.as_str()
-			.expect("Should be able to convert action name from yaml to str");
-
-		output_code += &format!("	{name}({name}),\n");
-	}
-	output_code += "}\n\n";
-
-	//generate a to_packets method for the Actions enum
-	output_code += "pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {\n";
-	output_code += "	match action {\n";
-	for action in spec.clone() {
-		let name = action["name"]
-			.as_str()
-			.expect("Should be able to convert action name from yaml to str");
-
-		output_code += &format!("		Actions::{name}(action) => {name}::to_packets(action),\n")
-	}
-	output_code += "	}\n";
-	output_code += "}\n\n";
 
 	//generate the to_packets for each individual action
 	for action in spec {
@@ -277,34 +254,11 @@ fn generate_movement_translation(spec: Yaml) {
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
+	output_code += "use crate::movement_translator::Movements;\n";
 	output_code += "use crate::packets::*;\n";
 	output_code += "use crate::bot::PLAYER;\n";
 	output_code += "use crate::physics::process_motion;\n";
 	output_code += "use crate::data_types::*;\n\n";
-
-	//generate an Movements enum
-	output_code += "pub(crate) enum Movements {\n";
-	for movement in spec.clone() {
-		let name = movement["name"]
-			.as_str()
-			.expect("Should be able to convert movement name from yaml to str");
-
-		output_code += &format!("	{name}({name}),\n");
-	}
-	output_code += "}\n\n";
-
-	//generate a to_packets method for the Movements enum
-	output_code += "pub(crate) fn to_packets(movement: Movements) -> Vec<Packets> {\n";
-	output_code += "	match movement {\n";
-	for movement in spec.clone() {
-		let name = movement["name"]
-			.as_str()
-			.expect("Should be able to convert movement name from yaml to str");
-
-		output_code += &format!("		Movements::{name}(movement) => {name}::to_packets(movement),\n")
-	}
-	output_code += "	}\n";
-	output_code += "}\n\n";
 
 	//generate the to_packets for each individual movement
 	for movement in spec {
