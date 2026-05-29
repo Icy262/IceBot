@@ -763,6 +763,11 @@ Actions:
             );
             return packets;
 
+    -   name: DoNothing
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
+
     -   name: Look
         packet conversion: |
             //TODO: implement
