@@ -70,6 +70,7 @@ impl World {
 				);
 
 				//overwrite the current block with the new one
+				dbg!(local_coordinates.y);
 				chunk.local_ids[local_coordinates.x as usize][local_coordinates.y as usize][local_coordinates.z as usize] =
 					Self::get_or_push_local_id(&block.block_type.to_string(), &mut chunk);
 			},
@@ -79,8 +80,8 @@ impl World {
 					.for_each(|block| Self::update_world_model(WorldUpdate::SingleBlock(block), tx.clone()));
 			},
 			WorldUpdate::BlockRegion(region) => {
-				let chunk_x = region.start_x / 16;
-				let chunk_z = region.start_z / 16;
+				let chunk_x = region.start_x.div_euclid(16);
+				let chunk_z = region.start_z.div_euclid(16);
 
 				//get a lock on the world
 				let mut world = WORLD_MODEL
@@ -127,7 +128,7 @@ impl World {
 				let region_local_orgin_x = region_orgin_local_coordinates.x as usize;
 				let region_local_orgin_y = region_orgin_local_coordinates.y as usize;
 				let region_local_orgin_z = region_orgin_local_coordinates.z as usize;
-				
+
 				//iterate over each block in the region
 				for current_region_offset_x in 0..region.size_x as usize {
 					for current_region_offset_y in 0..region.size_y as usize {
@@ -158,19 +159,19 @@ impl World {
 
 	pub(crate) fn get_chunk(chunk_x: i32, chunk_z: i32) -> Option<Arc<Mutex<Chunk>>> {
 		//get a lock on the world
-		let world = WORLD_MODEL.chunks.lock().expect("Critical failure in updating world model");
+		let world = WORLD_MODEL.chunks.lock().expect("Critical failure in obtaining world model");
 
 		//get the chunk and return an Arc to it
-		return world.get(&(chunk_x,chunk_z)).cloned();
+		return world.get(&(chunk_x, chunk_z)).cloned();
 	}
 
 	pub(crate) fn get_chunk_of_block(position: &Coordinates) -> Option<Arc<Mutex<Chunk>>> {
 		//find the chunk coordinates
-		let chunk_x = position.x / 16;
-		let chunk_y = position.y / 16;
+		let chunk_x = position.x.div_euclid(16);
+		let chunk_z = position.z.div_euclid(16);
 
 		//return the chunk
-		return Self::get_chunk(chunk_x, chunk_y);
+		return Self::get_chunk(chunk_x, chunk_z);
 	}
 
 	fn get_or_push_local_id(block_type: &String, chunk: &mut MutexGuard<Chunk>) -> u8 {

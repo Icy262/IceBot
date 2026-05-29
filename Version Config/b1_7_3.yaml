@@ -940,19 +940,19 @@ Packet Processor:
         packet processing: |
             let mut blocks: Vec<Block> = Vec::new();
             for i in 0..packet.block_update_array.length.value as usize {
+                let packed_coordinates = packet.block_update_array.coordinate_array[i].value as u16;
                 blocks.push(
                     Block {
                         block_type: packet.block_update_array.type_array[i].value.to_string(),
-                        //metadata: packet.block_update_array.metadata_array[i].clone(),
                         metadata: MCMetadata {
                             metadata_type: MCUByte { value: 0 }, //always a block metadata
                             value: MCUByte { value: packet.block_update_array.metadata_array[i].value },
                         },
                         position: Coordinates {
                             //bit shift and mask to isolate the important bits. top 4 bits are x, next 4 are z, final 8 are y
-                            x: (packet.block_update_array.coordinate_array[i].value >> 12) as i32,
-                            y: (packet.block_update_array.coordinate_array[i].value << 8) as i32,
-                            z: ((packet.block_update_array.coordinate_array[i].value >> 8) & 0b1111) as i32,
+                            x: (packed_coordinates >> 12) as i32,
+                            y: (packed_coordinates & 0b11111111) as i32,
+                            z: ((packed_coordinates >> 8) & 0b1111) as i32,
                         },
                     }
                 )
