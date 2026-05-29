@@ -7,12 +7,12 @@ pub(crate) enum Tasks {
 	ClearRegion(ClearRegion),
 }
 
-pub(crate) fn to_Movement(task: Tasks) -> Vec<Behaviour> {
+pub(crate) fn to_behaviours(task: Tasks) -> Vec<Behaviour> {
 	match task {
-		Tasks::GoTo(task) => GoTo::to_behaviour(task),
-		Tasks::Gather(task) => Gather::to_behaviour(task),
-		Tasks::FindItem(task) => FindItem::to_behaviour(task),
-		Tasks::ClearRegion(task) => ClearRegion::to_behaviour(task),
+		Tasks::GoTo(task) => GoTo::to_behaviours(task),
+		Tasks::Gather(task) => Gather::to_behaviours(task),
+		Tasks::FindItem(task) => FindItem::to_behaviours(task),
+		Tasks::ClearRegion(task) => ClearRegion::to_behaviours(task),
 	}
 }
 
