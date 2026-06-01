@@ -3,6 +3,7 @@ use std::net::TcpStream;
 use crate::block::{Block, Coordinates, Direction};
 use crate::movement_translator;
 use crate::packets::write_packet;
+use crate::packets::Packets;
 
 pub(crate) enum Movements {
 	Jump(Jump),
@@ -18,8 +19,8 @@ pub(crate) fn to_packets(movement: Movements) -> Vec<Packets> {
 	}
 }
 
-pub(crate) fn do_movement(movement: movement_translator::Movements, server_connection: &mut TcpStream) {
-	let packets = movement_translator::to_packets(movement);
+pub(crate) fn do_movement(movement: Movements, server_connection: &mut TcpStream) {
+	let packets = to_packets(movement);
 	for packet in packets {
 		write_packet(server_connection, packet);
 	}
