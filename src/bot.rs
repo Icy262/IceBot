@@ -6,11 +6,9 @@ use std::io::Write;
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
 
-use crate::action_translator::{self, Actions};
 use crate::block::{self, Block, Coordinates};
-use crate::movement_translator::{self, Movements};
-use crate::actions::{self, Join, Look};
-use crate::movements::{self, Jump, NoInput, Walk};
+use crate::actions::{Actions, do_action, to_packets, Join, Look};
+use crate::movements::{Movements, do_movement, Jump, NoInput, Walk};
 use crate::packets::{KeepAlive, Packets, PlayerPositionandLook};
 use crate::{packets::write_packet, player::Player};
 use crate::network_connection;
@@ -69,20 +67,20 @@ pub(crate) fn bot_main(username: String, server: String) {
 		},
 		_ => panic!("Should be a position and look"),
 	}
-	movements::do_action(Movements::NoInput(NoInput {}), &mut server_connection);
+	do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
 
 	loop {
 		let keep_alive = Packets::KeepAlive(KeepAlive {});
 		write_packet(&mut server_connection, keep_alive);
 
 		if !action_queue.is_empty() {
-			actions::do_action(action_queue.pop_front().expect("Should not be none because we just checked that it is some"), &mut server_connection);
+			do_action(action_queue.pop_front().expect("Should not be none because we just checked that it is some"), &mut server_connection);
 		}
 
 		if !move_queue.is_empty() {
-			movements::do_movement(move_queue.pop_front().expect("Should not be none because we just checked that it is some"), &mut server_connection)
+			do_movement(move_queue.pop_front().expect("Should not be none because we just checked that it is some"), &mut server_connection)
 		} else {
-			movements::do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
+			do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
 		}
 
 		std::thread::sleep(time::Duration::from_millis(50));

@@ -1,8 +1,8 @@
 use std::net::TcpStream;
-
 use crate::block::{Block, Coordinates, Direction};
 use crate::action_translator;
-use crate::packets::write_packet;
+use crate::packets::{Packets, write_packet};
+
 
 pub(crate) enum Actions {
 	Join(Join),
@@ -22,8 +22,8 @@ pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {
 	}
 }
 
-pub(crate) fn do_action(action: action_translator::Actions, server_connection: &mut TcpStream) {
-	let packets = action_translator::to_packets(action);
+pub(crate) fn do_action(action: Actions, server_connection: &mut TcpStream) {
+	let packets = to_packets(action);
 	for packet in packets {
 		write_packet(server_connection, packet);
 	}
