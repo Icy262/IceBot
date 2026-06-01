@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub(crate) struct Player {
 	pub(crate) x: f64,
 	pub(crate) y: f64,
