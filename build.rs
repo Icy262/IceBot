@@ -254,7 +254,6 @@ fn generate_movement_translation(spec: Yaml) {
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
-	output_code += "use crate::movement_translator::Movements;\n";
 	output_code += "use crate::packets::*;\n";
 	output_code += "use crate::bot::PLAYER;\n";
 	output_code += "use crate::physics::process_motion;\n";
