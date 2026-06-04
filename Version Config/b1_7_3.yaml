@@ -797,7 +797,7 @@ Movements:
             });
 
             //process motion
-            process_motion();
+            update_position();
 
             PLAYER.with_borrow(|player| {
                 packets.push(
@@ -829,7 +829,7 @@ Movements:
             });
 
             //process motion
-            process_motion();
+            update_position();
 
             PLAYER.with_borrow(|player| {
                 packets.push(
@@ -854,7 +854,7 @@ Movements:
             let mut packets: Vec<Packets> = Vec::new();
 
             //process motion
-            process_motion();
+            update_position();
 
             PLAYER.with_borrow(|player| {
                 packets.push(

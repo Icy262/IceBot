@@ -256,7 +256,7 @@ fn generate_movement_translation(spec: Yaml) {
 	//import all packets and data types because we don't know what we might need
 	output_code += "use crate::packets::*;\n";
 	output_code += "use crate::bot::PLAYER;\n";
-	output_code += "use crate::physics::process_motion;\n";
+	output_code += "use crate::physics::update_position;\n";
 	output_code += "use crate::data_types::*;\n\n";
 
 	//generate the to_packets for each individual movement
