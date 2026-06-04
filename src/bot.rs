@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::{cell::RefCell, collections::LinkedList};
 use std::net::TcpStream;
 use std::thread;
@@ -6,12 +7,13 @@ use std::io::Write;
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
 
+use crate::behaviour::Behaviour;
 use crate::block::{self, Block, Coordinates};
-use crate::actions::{Actions, do_action, to_packets, Join, Look};
+use crate::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
 use crate::movements::{Movements, do_movement, Jump, NoInput, Walk};
 use crate::packets::{KeepAlive, Packets, PlayerPositionandLook};
 use crate::{packets::write_packet, player::Player};
-use crate::network_connection;
+use crate::{behaviour, network_connection};
 use crate::world::{World, WorldUpdate};
 use crate::data_types::{MCBool, MCDouble, MCFloat};
 use crate::data_types::{MCMetadata, MCUByte};
@@ -49,8 +51,7 @@ pub(crate) fn bot_main(username: String, server: String) {
 	let mut server_connection_clone = server_connection.try_clone().unwrap();
 	let network_manager = thread::spawn(move || network_connection::read_manager(&mut server_connection_clone, tx));
 	
-	let mut action_queue: LinkedList<Actions> = LinkedList::new();
-	let mut move_queue: LinkedList<Movements> = LinkedList::new();
+	let mut behaviour_queue: VecDeque<Behaviour> = VecDeque::new();
 
 	//Initialize the player position and verify it to the server
 	let position_and_look = rx.recv().expect("Connection failed");
@@ -73,13 +74,12 @@ pub(crate) fn bot_main(username: String, server: String) {
 		let keep_alive = Packets::KeepAlive(KeepAlive {});
 		write_packet(&mut server_connection, keep_alive);
 
-		if !action_queue.is_empty() {
-			do_action(action_queue.pop_front().expect("Should not be none because we just checked that it is some"), &mut server_connection);
-		}
-
-		if !move_queue.is_empty() {
-			do_movement(move_queue.pop_front().expect("Should not be none because we just checked that it is some"), &mut server_connection)
+		if !behaviour_queue.is_empty() {
+			let behaviour = behaviour_queue.pop_front().expect("Should not be none because we just checked that it is some");
+			do_action(behaviour.action, &mut server_connection);
+			do_movement(behaviour.movement, &mut server_connection)
 		} else {
+			do_action(Actions::DoNothing(DoNothing {}), &mut server_connection);
 			do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
 		}
 
