@@ -1,0 +1,290 @@
+#special flag: true means that the contained data is elementary (cannot be expressed as a collection of simpler types), or requires special logic to read and write beyond simply reading the data value from stream.
+#if the special flag is set to true, format strings must be included for special read and special write that can be used to generate the required code
+#raw rust types should not be used as type if a suitable MC equivalent is defined. Read and write code for MC equivalents can be generated automatically, while rust types must be manually defined.
+Types:
+    -   MC name: byte
+        Rust Equivalent: MCByte
+        special: true
+        special read: |
+            let value = stream.read_i8().expect("Should be able to read i8 from stream");
+        special write: |
+            stream.write_i8(data.value).expect("Should be able to write i8 to stream");
+        Data:
+            -   value: i8
+
+    -   MC name: ubyte
+        Rust Equivalent: MCUByte
+        special: true
+        special read: |
+            let value = stream.read_u8().expect("Should be able to read u8 from stream");
+        special write: |
+            stream.write_u8(data.value).expect("Should be able to write u8 to stream");
+        Data:
+            -   value: u8
+
+    -   MC name: short
+        Rust Equivalent: MCShort
+        special: true
+        special read: |
+            let value = stream.read_i16::<BigEndian>().expect("Should be able to read i16 from stream");
+        special write: |
+            stream.write_i16::<BigEndian>(data.value).expect("Should be able to write i16 to stream");
+        Data:
+            -   value: i16
+
+    -   MC name: int
+        Rust Equivalent: MCInt
+        special: true
+        special read: |
+            let value = stream.read_i32::<BigEndian>().expect("Should be able to read i32 from stream");
+        special write: |
+            stream.write_i32::<BigEndian>(data.value).expect("Should be able to write i32 to stream");
+        Data:
+            -   value: i32
+
+    -   MC name: long
+        Rust Equivalent: MCLong
+        special: true
+        special read: |
+            let value = stream.read_i64::<BigEndian>().expect("Should be able to read i64 from stream");
+        special write: |
+            stream.write_i64::<BigEndian>(data.value).expect("Should be able to write i64 to stream");
+        Data:
+            -   value: i64
+
+    -   MC name: float
+        Rust Equivalent: MCFloat
+        special: true
+        special read: |
+            let value = stream.read_f32::<BigEndian>().expect("Should be able to read f32 from stream");
+        special write: |
+            stream.write_f32::<BigEndian>(data.value).expect("Should be able to write f32 to stream");
+        Data:
+            -   value: f32
+
+    -   MC name: double
+        Rust Equivalent: MCDouble
+        special: true
+        special read: |
+            let value = stream.read_f64::<BigEndian>().expect("Should be able to read f64 from stream");
+        special write: |
+            stream.write_f64::<BigEndian>(data.value).expect("Should be able to write f64 to stream");
+        Data:
+            -   value: f64
+
+    -   MC name: string8
+        Rust Equivalent: MCString8
+        special: true
+        special read: |
+            let length = MCShort::read(stream);
+            let mut buffer = vec![0u8; length.value as usize];
+            stream.read_exact(&mut buffer).expect("Should be able to read length u8 from stream");
+            let text = String::from_utf8(buffer).expect("Should be able to convert array of utf8 bytes to string");
+        special write: |
+            MCShort::write(stream, data.length);
+            stream.write_all(data.text.as_bytes()).expect("Should be able to write all bytes of utf8 to stream");
+        Data:
+            -   length: MCShort
+            -   text: String
+
+    -   MC name: string16
+        Rust Equivalent: MCString16
+        special: true
+        special read: |
+            let length = MCShort::read(stream);
+            let mut buffer = vec![0u8; 2 * length.value as usize];
+            stream.read_exact(&mut buffer).expect("Should be able to read exact number of bytes");
+            let text = String::from_utf16(&buffer.chunks_exact(2).map(|character_bytes| u16::from_be_bytes([character_bytes[0], character_bytes[1]])).collect::<Vec<u16>>()).expect("Should be valid UCS2 data");
+        special write: |
+            let mut encoded = vec![0u16; data.length.value as usize];
+            let _ = ucs2::encode(&data.text, &mut encoded).unwrap();
+            MCShort::write(stream, data.length);
+            stream
+                .write_all(
+                    encoded
+                        .iter()
+                        .flat_map(|&u| u.to_be_bytes())
+                        .collect::<Vec<u8>>()
+                        .as_slice()
+                )
+                .unwrap();
+        Data:
+            -   length: MCShort
+            -   text: String
+
+    -   MC name: bool
+        Rust Equivalent: MCBool
+        special: true
+        special read: |
+            let value = stream.read_u8().expect("Should be able to read u8 from stream") == 1;
+        special write: |
+            stream.write_u8(data.value as u8).expect("Should be able to write bool (u8) to stream");
+        Data:
+            -   value: bool
+
+    -   MC name: metadata
+        Rust Equivalent: MCMetadata
+        special: true
+        #TODO: remove improper reading, need more information on the format first
+        special read: |
+            //init
+            let metadata_type = MCUByte { value: 0 };
+            let value = MCUByte { value: 0 }; //TODO: implement storing value properly
+            loop {
+                let metadata_type = MCUByte::read(stream);
+                if metadata_type.value == 127 {
+                    break;
+                } else {
+                    match metadata_type.value >> 5 {
+                        0 => { MCByte::read(stream); },
+                        1 => { MCShort::read(stream); },
+                        2 => { MCInt::read(stream); },
+                        3 => { MCFloat::read(stream); },
+                        4 => { MCString16::read(stream); },
+                        5 => { MCItem::read(stream); },
+                        6 => {
+                            for _ in 0..3 {
+                                MCInt::read(stream);
+                            }
+                        }
+                        _ => { panic!("Illegal metadata value"); }, //TODO: replace with proper error handling
+                    }
+                }
+            }
+        #TODO: implement storing metadata properly
+        special write: |
+            let _ = 1; //PLACEHOLDER
+        Data:
+            -   metadata type: MCUByte #TODO: replace with enum of metadata types
+                #type = 0, read byte
+                #type = 1, read short
+                #type = 2, read int
+                #type = 3, read float
+                #type = 4, read string16
+                #type = 5, read short, byte, short and save as item stack (id, count, damage)
+                #type = 6, read int, int, int and save as extra entity information
+            -   value: MCUByte #TODO: replace with correct type
+
+    -   MC name: MapChunk
+        Rust Equivalent: MCMapChunk
+        special: true
+        special read: |
+            let length = MCInt::read(stream);
+            let mut compressed_data: Vec<MCUByte> = Vec::new();
+            for _ in 0..length.value {
+                compressed_data.push(MCUByte::read(stream));
+            }
+        special write: |
+            let _ = 1; //PLACEHOLDER
+        Data:
+            -   length: MCInt #Compressed Size
+            -   Compressed Data: Vec<MCUByte> #Compressed Data
+
+    -   MC name: InventoryPayload
+        Rust Equivalent: MCInventoryPayload
+        special: true
+        special read: |
+            let count = MCShort::read(stream);
+            let mut payload = Vec::new();
+            for _ in 0..count.value {
+                payload.push(
+                    MCItem::read(stream)
+                )
+            }
+        special write: |
+            let _ = 1; //PLACEHOLDER
+        Data:
+            -   Count: MCShort
+            -   Payload: Vec<MCItem>
+
+    -   MC name: BlockUpdateArray
+        Rust Equivalent: MCBlockUpdateArray
+        special: true
+        special read: |
+            let length = MCShort::read(stream);
+            let mut coordinate_array: Vec<MCShort> = Vec::new();
+            let mut type_array: Vec<MCByte> = Vec::new();
+            //let mut metadata_array: Vec<MCMetadata> = Vec::new();
+            let mut metadata_array: Vec<MCUByte> = Vec::new();
+            for _ in 0..(length.value as usize) {
+                coordinate_array.push(MCShort::read(stream));
+            }
+            for _ in 0..(length.value as usize) {
+                type_array.push(MCByte::read(stream));
+            }
+            for _ in 0..(length.value as usize) {
+                metadata_array.push(MCUByte::read(stream));
+            }
+            //for _ in 0..(length.value as usize) {
+            //    metadata_array.push(MCMetadata::read(stream));
+            //}
+        special write: |
+            MCShort::write(stream, data.length.clone() );
+            for i in 0..data.length.value {
+                MCShort::write(stream, data.coordinate_array[i as usize].clone());
+            }
+            for i in 0..data.length.value {
+                MCByte::write(stream, data.type_array[i as usize].clone());
+            }
+            for i in 0..data.length.value {
+                MCUByte::write(stream, data.metadata_array[i as usize].clone());
+            }
+            //for i in 0..data.length.value {
+            //    MCMetadata::write(stream, data.metadata_array[i as usize].clone());
+            //}
+        Data:
+            -   length: MCShort #Array Size
+            -   Coordinate Array: Vec<MCShort>
+            -   Type Array: Vec<MCByte>
+            -   Metadata Array: Vec<MCUByte>
+
+    -   MC name: BlockCoordinate
+        Rust Equivalent: MCBlockCoordinate
+        Data:
+            -   x: MCByte
+            -   y: MCByte
+            -   z: MCByte
+
+    -   MC name: ExplosionUpdateArray
+        Rust Equivalent: MCExplosionUpdate
+        special: true
+        special read: |
+            let length = MCInt::read(stream);
+            let mut records: Vec<MCBlockCoordinate> = Vec::new();
+            for _ in 0..length.value {
+                records.push(MCBlockCoordinate::read(stream))
+            }
+        special write: |
+            let _ = 1; //PLACEHOLDER
+        Data:
+            -   length: MCInt #Record Count
+            -   Records: Vec<MCBlockCoordinate>
+
+    -   MC name: Item
+        Rust Equivalent: MCItem
+        special: true
+        special read: |
+            let item_id = MCShort::read(stream);
+            
+            //the server will only send the count and uses if the id is not -1 (-1 means empty slot)
+            let count = if item_id.value != -1 {
+                MCByte::read(stream)
+            } else {
+                MCByte {
+                    value: 0,
+                }
+            };
+
+            let uses = if item_id.value != -1 {
+                MCShort::read(stream)
+            } else {
+                MCShort {
+                    value: 0,
+                }
+            };
+        special write: |
+            let _ = 1; //PLACEHOLDER
+        Data:
+            -   Item ID: MCShort
+            -   Count: MCByte
+            -   Uses: MCShort

@@ -1,0 +1,9 @@
+#specifies all the entities in the game, their health, and drops
+Entities:
+    #just placeholders
+    -   name: cow
+        id: 15
+        health: 10
+        drops:
+            -   leather
+            -   raw_beef

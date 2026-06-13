@@ -1,0 +1,10 @@
+#specifies all the items in the game, their source, and stack limits
+#sources can be crafting, drops, or something else
+#crafting recipies are defined as an array where slots are numbered 1-9 and left to right, top to bottom
+Items:
+    #just placeholders
+    -   name: stone_shovel
+        id: 12
+        stack_limit: 1
+        sources:
+            -   craft: [none, cobblestone, none, none, stick, none, none, stick, none]

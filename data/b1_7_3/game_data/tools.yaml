@@ -1,0 +1,12 @@
+#specifies all the tool types in the game and their tiers
+Tools:
+    -   name: hand
+        tiers:
+            -   hand
+    -   name: shovel
+        tiers:
+            -   wood
+            -   stone
+            -   iron
+            -   gold
+            -   diamond

@@ -1,0 +1,49 @@
+Actions:
+    -   name: Join
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            let username = MCString16 {
+                length: MCShort { value: action.username.len() as i16 },
+                text: action.username,
+            };
+            packets.push(
+                Packets::Handshake(
+                    Handshake {
+                        username: username.clone(),
+                    }
+                )
+            );
+            packets.push(
+                Packets::LoginRequest(
+                    LoginRequest {
+                        protocol_version: MCInt { value: 14 },
+                        username: username,
+                        map_seed: MCLong { value: 0 as i64 },
+                        dimension: MCByte { value: 0 as i8 },
+                    }
+                )
+            );
+            return packets;
+
+    -   name: DoNothing
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: Look
+        packet conversion: |
+            //TODO: implement
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: PlaceBlock
+        packet conversion: |
+            //TODO: implement
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: PlaceBlockAgainst
+        packet conversion: |
+            //TODO: implement
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;

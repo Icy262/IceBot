@@ -7,39 +7,32 @@ fn main() {
 
 	println!("cargo:rerun-if-env-changed=GAME_VERSION");
 
-	let version_spec_path = format!("Version Config/{version}.yaml");
-
-	let version_spec = YamlLoader::load_from_str(&fs::read_to_string(&version_spec_path)
-		.expect(&format!("Should be able to find protocol specification. Please check that there is a file named {version}.yaml in network_protocol_specifications")))
-		.expect("Should be able to convert string of yaml to yaml object")
-		[0].to_owned();
-
-	generate_data_types(version_spec["Types"].clone());
-	generate_packets(version_spec["Packets"].clone());
-	generate_action_translation(version_spec["Actions"].clone());
-	generate_movement_translation(version_spec["Movements"].clone());
-	generate_packet_processor(version_spec["Packet Processor"].clone());
+	generate_data_types(&version);
+	generate_packets(&version);
+	generate_action_translation(&version);
+	generate_movement_translation(&version);
+	generate_packet_processor(&version);
 }
 
-fn generate_data_types(spec: Yaml) {
+fn generate_data_types(version: &String) {
+	let yaml_path = format!("data/{version}/network/types.yaml");
+	let types_spec = YamlLoader::load_from_str(&fs::read_to_string(&yaml_path)
+		.expect(&format!("Could not find the network types specification. Please check that data/{version}/network/types.yaml exists")))
+		.expect("Should be able to convert string of yaml to yaml object")
+		[0]
+		["Types"]
+		.to_owned();
+
 	let mut output_code = String::new();
 
-	//imports
 	output_code += "use std::io::{Read, Write};\n";
 	output_code += "use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};\n";
 	output_code += "use ucs2;\n";
 
-	for mc_type in spec {
-		//extract data
-		let _mc_name = mc_type["MC name"]
-			.as_str()
-			.expect("All data types should contain a minecraft name")
-			.replace(" ", "");
+	for mc_type in types_spec {
 		let rust_equivalent = mc_type["Rust Equivalent"]
 			.as_str()
 			.expect("All data types should contain a rust equivalent");
-		//if the data type is an elementary data type, or requires complex logic to read and write, allows for a manual definition to be specified
-		let _special = mc_type["special"].as_bool().unwrap_or(false);
 		let contained_data = extract_contained_data(&mc_type);
 
 		//struct definition
@@ -99,7 +92,15 @@ fn generate_data_types(spec: Yaml) {
 	fs::write("src/data_types.rs", output_code).unwrap();
 }
 
-fn generate_packets(spec: Yaml) {
+fn generate_packets(version: &String) {
+	let yaml_path = format!("data/{version}/network/packets.yaml");
+	let packets_spec = YamlLoader::load_from_str(&fs::read_to_string(&yaml_path)
+		.expect(&format!("Could not find the network packets specification. Please check that data/{version}/network/packets.yaml exists")))
+		.expect("Should be able to convert string of yaml to yaml object")
+		[0]
+		["Packets"]
+		.to_owned();
+
 	let mut output_code = String::new();
 
 	//imports
@@ -107,16 +108,16 @@ fn generate_packets(spec: Yaml) {
 	output_code += "use crate::data_types::*;\n\n";
 
 	//insert enum of packets
-	output_code += &packet_enum_generator(spec.clone());
+	output_code += &packet_enum_generator(packets_spec.clone());
 
 	//insert packet reader
-	output_code += &generate_packet_read(spec.clone());
+	output_code += &generate_packet_read(packets_spec.clone());
 
 	//insert packet writer
-	output_code += &generate_packet_write(spec.clone());
+	output_code += &generate_packet_write(packets_spec.clone());
 
 	//insert packet definitions
-	for packet in spec {
+	for packet in packets_spec {
 		//extracting data
 		let name = packet["name"]
 			.as_str()
@@ -210,7 +211,15 @@ fn generate_packets(spec: Yaml) {
 	fs::write("src/packets.rs", output_code).unwrap();
 }
 
-fn generate_action_translation(spec: Yaml) {
+fn generate_action_translation(version: &String) {
+	let yaml_path = format!("data/{version}/player/actions.yaml");
+	let actions_spec = YamlLoader::load_from_str(&fs::read_to_string(&yaml_path)
+		.expect(&format!("Could not find the player actions specification. Please check that data/{version}/player/actions.yaml exists")))
+		.expect("Should be able to convert string of yaml to yaml object")
+		[0]
+		["Actions"]
+		.to_owned();
+	
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
@@ -219,7 +228,7 @@ fn generate_action_translation(spec: Yaml) {
 	output_code += "use crate::data_types::*;\n\n";
 
 	//generate the to_packets for each individual action
-	for action in spec {
+	for action in actions_spec {
 		//extracting data
 		let name = action["name"]
 			.as_str()
@@ -250,7 +259,15 @@ fn generate_action_translation(spec: Yaml) {
 	fs::write("src/action_translator.rs", output_code).unwrap();
 }
 
-fn generate_movement_translation(spec: Yaml) {
+fn generate_movement_translation(version: &String) {
+	let yaml_path = format!("data/{version}/player/movements.yaml");
+	let movements_spec = YamlLoader::load_from_str(&fs::read_to_string(&yaml_path)
+		.expect(&format!("Could not find the player movements specification. Please check that data/{version}/player/movements.yaml exists")))
+		.expect("Should be able to convert string of yaml to yaml object")
+		[0]
+		["Movements"]
+		.to_owned();
+
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
@@ -260,7 +277,7 @@ fn generate_movement_translation(spec: Yaml) {
 	output_code += "use crate::data_types::*;\n\n";
 
 	//generate the to_packets for each individual movement
-	for movement in spec {
+	for movement in movements_spec {
 		//extracting data
 		let name = movement["name"]
 			.as_str()
@@ -291,7 +308,15 @@ fn generate_movement_translation(spec: Yaml) {
 	fs::write("src/movement_translator.rs", output_code).unwrap();
 }
 
-fn generate_packet_processor(spec: Yaml) {
+fn generate_packet_processor(version: &String) {
+	let yaml_path = format!("data/{version}/network/packet_processor.yaml");
+	let packet_processor_spec = YamlLoader::load_from_str(&fs::read_to_string(&yaml_path)
+		.expect(&format!("Could not find the network packet processor specification. Please check that data/{version}/network/packet_processor.yaml exists")))
+		.expect("Should be able to convert string of yaml to yaml object")
+		[0]
+		["Packet Processor"]
+		.to_owned();
+	
 	let mut output_code = String::new();
 
 	//import the types we need
@@ -299,7 +324,7 @@ fn generate_packet_processor(spec: Yaml) {
 	output_code += "use crate::world::WorldUpdate;\n";
 	output_code += "use crate::packets::Packets;\n";
 	output_code += "use crate::block::Coordinates;\n";
-	output_code += "use crate::data_types::{MCByte, MCUByte, MCMetadata, MCDouble, MCBool};\n";
+	output_code += "use crate::data_types::*;\n";
 	output_code += "use crate::entity::EntityPositionAndLook;\n";
 	output_code += "use std::io::Read;\n";
 	output_code += "use crate::world::Region;\n";
@@ -311,7 +336,7 @@ fn generate_packet_processor(spec: Yaml) {
 	//match opening
 	output_code += "	return match packet {\n";
 
-	for packet in spec {
+	for packet in packet_processor_spec {
 		let name = packet["name"]
 			.as_str()
 			.expect("Should be able to convert packet name from yaml to str")
