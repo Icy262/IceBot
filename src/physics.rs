@@ -30,7 +30,7 @@ pub(crate) fn process_motion(old_player: &Player) -> Player {
 		let block_below = World::get_block(crate::block::Coordinates { x: new_player.x as i32, y: new_player.y as i32 - 1, z: new_player.z as i32 });
 		if block_below.is_some() {
 			//TODO: Implement support for falling through things that are not air but are solid (eg. grass or water)
-			if block_below.expect("Should not be None because we checked it is some").block_type == "air" {
+			if block_below.expect("Should not be None because we checked it is some").block_id == "air" {
 				new_player.on_ground = false;
 			} else {
 				//if on ground, stop vertical velocity and unclip the old_player from the block below
@@ -44,7 +44,7 @@ pub(crate) fn process_motion(old_player: &Player) -> Player {
 			let block_below = World::get_block(crate::block::Coordinates { x: new_player.x as i32, y: new_player.y as i32 - 1, z: new_player.z as i32 });
 			if block_below.is_some() {
 				//TODO: Implement support for falling through things that are not air but are solid (eg. grass or water)
-				if block_below.expect("Should not be None because we checked it is some").block_type != "air" {
+				if block_below.expect("Should not be None because we checked it is some").block_id != "air" {
 					new_player.on_ground = true;
 				}
 			}

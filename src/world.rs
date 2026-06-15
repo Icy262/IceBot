@@ -72,7 +72,7 @@ impl World {
 				//overwrite the current block with the new one
 				dbg!(local_coordinates.y);
 				chunk.local_ids[local_coordinates.x as usize][local_coordinates.y as usize][local_coordinates.z as usize] =
-					Self::get_or_push_local_id(&block.block_type.to_string(), &mut chunk);
+					Self::get_or_push_local_id(&block.block_id.to_string(), &mut chunk);
 			},
 			WorldUpdate::MultiBlock(blocks) => {
 				blocks
@@ -174,16 +174,16 @@ impl World {
 		return Self::get_chunk(chunk_x, chunk_z);
 	}
 
-	fn get_or_push_local_id(block_type: &String, chunk: &mut MutexGuard<Chunk>) -> u8 {
+	fn get_or_push_local_id(block_id: &String, chunk: &mut MutexGuard<Chunk>) -> u8 {
 		//get the local id
-		let mut local_block_type = chunk.palette.iter().position(|block| block == block_type);
+		let mut local_block_id = chunk.palette.iter().position(|block| block == block_id);
 
 		//if Some, then it was in the palette and we have the local id, if None, we should push the block type to the palette and use the index of the final element as the local id
-		if local_block_type.is_none() {
-			chunk.palette.push(block_type.clone());
+		if local_block_id.is_none() {
+			chunk.palette.push(block_id.clone());
 			return (chunk.palette.len() - 1) as u8;
 		} else {
-			return local_block_type.expect("Should not be None because we checked") as u8;
+			return local_block_id.expect("Should not be None because we checked") as u8;
 		}
 	}
 
@@ -212,10 +212,8 @@ impl World {
 
 		return Some(
 			Block {
-				block_type: chunk.palette.get(chunk.local_ids[local_x][local_y][local_z] as usize).expect("Should not fail because that would make the chunk corrupted").to_owned(),
+				block_id: chunk.palette.get(chunk.local_ids[local_x][local_y][local_z] as usize).expect("Should not fail because that would make the chunk corrupted").to_owned(),
 				position: position,
-				//TODO: implement metadata
-				metadata: MCMetadata { metadata_type: MCUByte { value: 0 }, value: MCUByte { value: 0 } },
 			}
 		);
 	}

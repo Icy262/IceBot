@@ -11,6 +11,6 @@ pub(crate) struct EntityPositionAndLook {
 
 pub(crate) struct Entity {
 	//TODO: implement
-	// pub(crate) block_type: String,
+	// pub(crate) block_id: String,
 	// pub(crate) metadata: MCMetadata,
 }
