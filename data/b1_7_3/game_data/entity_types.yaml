@@ -1,5 +1,5 @@
 #specifies all the entities in the game, their health, and drops
-Entities:
+Entity Types:
     #just placeholders
     -   name: cow
         id: 15

@@ -1,8 +1,8 @@
 #specifies all the blocks in the game, their correct tool, block hardness, drops, hitbox, whether they are solid, non-solid, or liquid, and opaque or transparent
 #TODO: come up with a system for defining hitboxes. for now, just define a box from [start_x, end_x, start_y, end_y, start_z, end_z]
-Blocks:
+Block Types:
     #just placeholder values
-    -   name: dirt
+    -   friendly name: dirt
         id: 5
         tool: shovel
         hardness: 10
