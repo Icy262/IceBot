@@ -7,6 +7,7 @@ edition = "2024"
 ucs2 = "0.3.3"
 byteorder = "1.5.0"
 flate2 = "1.1.9"
+yaml-rust = "0.4.5"
 
 [build-dependencies]
 yaml-rust = "0.4.5"
