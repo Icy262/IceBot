@@ -48,37 +48,37 @@ pub(crate) enum LightTransparency {
 }
 
 //Builds a registry of all the block types.
-pub(crate) fn build_block_id_registry() -> HashMap<String, BlockType> {
-	static block_id_DEFINITIONS: &str = include_str!(
+pub(crate) fn build_block_type_registry() -> HashMap<String, BlockType> {
+	static BLOCK_TYPE_DEFINITIONS: &str = include_str!(
 		concat!(
 			"../../data/",
 			env!("GAME_VERSION"),
-			"/game_data/blocks.yaml"
+			"/game_data/block_types.yaml"
 		)
 	);
 	
-	let yaml_block_id_definitions = YamlLoader::load_from_str(BLOCK_DEFINITIONS)
+	let yaml_block_type_definitions = YamlLoader::load_from_str(BLOCK_TYPE_DEFINITIONS)
 		.expect("Should be able to convert string of yaml to yaml object")
 		[0]
-		["Blocks"]
+		["Block Types"]
 		.to_owned();
 
-	let block_id_registry = HashMap::new();
+	let mut block_type_registry = HashMap::new();
 
-	for block_id in yaml_block_id_definitions {
+	for block_type in yaml_block_type_definitions {
 		//TODO: implement better error messages (state which block is broken)
-		block_id_registry.insert(
-			block_id["id"].as_str().expect("Should be able to convert yaml representation of block type id to str").to_string(),
+		block_type_registry.insert(
+			block_type["id"].as_i64().expect("Should be able to convert yaml representation of block type id to i64").to_string(),
 			BlockType {
-				friendly_name: block_id["friendly name"].as_str().expect("Should be able to convert yaml representation of block friendly name to str").to_string(),
-				id: block_id["id"].as_str().expect("Should be able to convert yaml representation of block type id to str").to_string(),
-				collision: match block_id["collision"].as_str().expect("Should be able to convert yaml representation of block type collision to str") {
+				friendly_name: block_type["friendly name"].as_str().expect("Should be able to convert yaml representation of block friendly name to str").to_string(),
+				id: block_type["id"].as_i64().expect("Should be able to convert yaml representation of block type id to i64").to_string(),
+				collision: match block_type["collision"].as_str().expect("Should be able to convert yaml representation of block type collision to str") {
 					"solid" => Collision::Solid,
 					"non-solid" => Collision::NonSolid,
 					"liquid" => Collision::Liquid,
 					_ => panic!("Invalid collision type in block types yaml"),
 				},
-				transparency: match block_id["collision"].as_str().expect("Should be able to convert yaml representation of block type transparency to str") {
+				transparency: match block_type["transparency"].as_str().expect("Should be able to convert yaml representation of block type transparency to str") {
 					"opaque" => LightTransparency::Opaque,
 					"transparent" => LightTransparency::Transparent,
 					_ => panic!("Invalid transparency type in block types yaml"),
@@ -87,5 +87,5 @@ pub(crate) fn build_block_id_registry() -> HashMap<String, BlockType> {
 		);
 	}
 
-	return block_id_registry;
+	return block_type_registry;
 }

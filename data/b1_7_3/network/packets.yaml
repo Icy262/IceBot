@@ -315,7 +315,7 @@ Packets:
             -   X: int
             -   Y: byte
             -   Z: int
-            -   Block Type: byte
+            -   Block Id: byte
             -   Block Metadata: byte
 
     -   name: Block Action
