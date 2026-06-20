@@ -2,8 +2,8 @@ use std::net::TcpStream;
 
 use crate::block::{Block, Coordinates, Direction};
 use crate::movement_translator;
-use crate::packets::write_packet;
 use crate::packets::Packets;
+use crate::packets::write_packet;
 
 pub(crate) enum Movements {
 	Jump(Jump),

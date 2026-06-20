@@ -1,8 +1,7 @@
-use std::net::TcpStream;
-use crate::block::{Block, Coordinates, Direction};
 use crate::action_translator;
+use crate::block::{Block, Coordinates, Direction};
 use crate::packets::{Packets, write_packet};
-
+use std::net::TcpStream;
 
 pub(crate) enum Actions {
 	Join(Join),
@@ -34,8 +33,7 @@ pub(crate) struct Join {
 	pub(crate) username: String, //player username
 }
 
-pub(crate) struct DoNothing {
-}
+pub(crate) struct DoNothing {}
 
 pub(crate) struct Look {
 	pub(crate) target: Coordinates, //Coordinates that bot will look at
@@ -43,17 +41,17 @@ pub(crate) struct Look {
 
 pub(crate) struct BreakBlock {
 	pub(crate) position: Coordinates, //coordinates of the block to break
-	pub(crate) face: Direction, //face of block we are hitting
+	pub(crate) face: Direction,       //face of block we are hitting
 }
 
 //For if we just want a block in a particular position
 pub(crate) struct PlaceBlock {
 	pub(crate) position: Coordinates, //position of the block's location
-	pub(crate) rotation: Direction, //direction of the placed block
+	pub(crate) rotation: Direction,   //direction of the placed block
 }
 
 //For if we want to specify the block we are placing against
 pub(crate) struct PlaceBlockAgainst {
 	pub(crate) position: Coordinates, //position of the block we are placing against
-	pub(crate) rotation: Direction, //direction of the placed block
+	pub(crate) rotation: Direction,   //direction of the placed block
 }

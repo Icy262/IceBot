@@ -1,22 +1,22 @@
-use std::collections::VecDeque;
-use std::{cell::RefCell, collections::LinkedList};
-use std::net::TcpStream;
-use std::thread;
 use core::time;
+use std::collections::VecDeque;
 use std::io::Write;
-use std::sync::mpsc::{Sender, Receiver};
+use std::net::TcpStream;
 use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, Sender};
+use std::thread;
+use std::{cell::RefCell, collections::LinkedList};
 
+use crate::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
 use crate::behaviour::Behaviour;
 use crate::block::{self, Block, Coordinates};
-use crate::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
-use crate::movements::{Movements, do_movement, Jump, NoInput, Walk};
-use crate::packets::{KeepAlive, Packets, PlayerPositionandLook};
-use crate::{packets::write_packet, player::Player};
-use crate::{behaviour, network_connection};
-use crate::world::{World, WorldUpdate};
 use crate::data_types::{MCBool, MCDouble, MCFloat};
 use crate::data_types::{MCMetadata, MCUByte};
+use crate::movements::{Jump, Movements, NoInput, Walk, do_movement};
+use crate::packets::{KeepAlive, Packets, PlayerPositionandLook};
+use crate::world::{World, WorldUpdate};
+use crate::{behaviour, network_connection};
+use crate::{packets::write_packet, player::Player};
 
 thread_local! {
 	pub(crate) static PLAYER: RefCell<Player> = RefCell::new(
@@ -38,9 +38,7 @@ pub(crate) fn bot_main(username: String, server: String) {
 	let mut server_connection = TcpStream::connect(server).unwrap();
 
 	//Join the server
-	let join = Join {
-		username: username,
-	};
+	let join = Join { username: username };
 	let packets = Join::to_packets(join);
 	for packet in packets {
 		write_packet(&mut server_connection, packet);
@@ -49,8 +47,9 @@ pub(crate) fn bot_main(username: String, server: String) {
 	//Start a network manager
 	let (tx, rx): (Sender<WorldUpdate>, Receiver<WorldUpdate>) = mpsc::channel();
 	let mut server_connection_clone = server_connection.try_clone().unwrap();
-	let network_manager = thread::spawn(move || network_connection::read_manager(&mut server_connection_clone, tx));
-	
+	let network_manager =
+		thread::spawn(move || network_connection::read_manager(&mut server_connection_clone, tx));
+
 	let mut behaviour_queue: VecDeque<Behaviour> = VecDeque::new();
 
 	//Initialize the player position and verify it to the server
@@ -65,7 +64,7 @@ pub(crate) fn bot_main(username: String, server: String) {
 				player.pitch = position_and_look.pitch;
 				player.on_ground = position_and_look.on_ground;
 			});
-		},
+		}
 		_ => panic!("Should be a position and look"),
 	}
 	do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
@@ -75,7 +74,9 @@ pub(crate) fn bot_main(username: String, server: String) {
 		write_packet(&mut server_connection, keep_alive);
 
 		if !behaviour_queue.is_empty() {
-			let behaviour = behaviour_queue.pop_front().expect("Should not be none because we just checked that it is some");
+			let behaviour = behaviour_queue
+				.pop_front()
+				.expect("Should not be none because we just checked that it is some");
 			do_action(behaviour.action, &mut server_connection);
 			do_movement(behaviour.movement, &mut server_connection)
 		} else {

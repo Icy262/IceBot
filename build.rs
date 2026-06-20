@@ -219,7 +219,7 @@ fn generate_action_translation(version: &String) {
 		[0]
 		["Actions"]
 		.to_owned();
-	
+
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
@@ -316,7 +316,7 @@ fn generate_packet_processor(version: &String) {
 		[0]
 		["Packet Processor"]
 		.to_owned();
-	
+
 	let mut output_code = String::new();
 
 	//import the types we need

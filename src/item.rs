@@ -1,7 +1,3 @@
-pub(crate) struct Item {
+pub(crate) struct Item {}
 
-}
-
-pub(crate) struct ItemType {
-
-}
+pub(crate) struct ItemType {}

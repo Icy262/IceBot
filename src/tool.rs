@@ -1,3 +1,1 @@
-pub(crate) enum ToolType {
-
-}
+pub(crate) enum ToolType {}

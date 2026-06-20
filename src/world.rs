@@ -1,12 +1,12 @@
 use crate::block::{Block, Coordinates};
-use crate::data_types::{MCUByte, MCMetadata};
-use crate::entity::{Entity, EntityPositionAndLook};
 use crate::bot::PLAYER;
+use crate::data_types::{MCMetadata, MCUByte};
+use crate::entity::{Entity, EntityPositionAndLook};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex, MutexGuard, RwLock};
-use std::sync::LazyLock;
 use std::mem::drop;
+use std::sync::LazyLock;
 use std::sync::mpsc::Sender;
+use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 
 pub(crate) static WORLD_MODEL: LazyLock<World> = LazyLock::new(|| World {
 	chunks: Mutex::new(HashMap::new()),
@@ -41,7 +41,7 @@ pub(crate) struct Chunk {
 pub(crate) struct World {
 	//TODO: implement trimming the loaded blocks
 	chunks: Mutex<HashMap<(i32, i32), Arc<Mutex<Chunk>>>>, //for performance, we don't use a regular Block as these have too much overhead. instead, break the world into identically sized chunks which can store blocks more efficiently using palettes. use a hashmap so we can store an arbitrary number of chunks that may be far apart in the world. the hashmap key is formed as "x chunk coordinate,y chunk coordinate"
-	entities: Vec<Entity>, //entities in the world
+	entities: Vec<Entity>,                                 //entities in the world
 }
 
 impl World {
@@ -61,24 +61,23 @@ impl World {
 				let mut chunk = chunk.lock().expect("Critical error in getting a chunk");
 
 				//get the local x, y, z coordinates (position relative to the lowest global coordinate corner of the chunk)
-				let local_coordinates = Self::global_to_local_coordinates(
-					&Coordinates {
-						x: block.position.x,
-						y: block.position.y,
-						z: block.position.z,
-					}
-				);
+				let local_coordinates = Self::global_to_local_coordinates(&Coordinates {
+					x: block.position.x,
+					y: block.position.y,
+					z: block.position.z,
+				});
 
 				//overwrite the current block with the new one
 				dbg!(local_coordinates.y);
-				chunk.local_ids[local_coordinates.x as usize][local_coordinates.y as usize][local_coordinates.z as usize] =
+				chunk.local_ids[local_coordinates.x as usize][local_coordinates.y as usize]
+					[local_coordinates.z as usize] =
 					Self::get_or_push_local_id(&block.block_id.to_string(), &mut chunk);
-			},
+			}
 			WorldUpdate::MultiBlock(blocks) => {
-				blocks
-					.into_iter()
-					.for_each(|block| Self::update_world_model(WorldUpdate::SingleBlock(block), tx.clone()));
-			},
+				blocks.into_iter().for_each(|block| {
+					Self::update_world_model(WorldUpdate::SingleBlock(block), tx.clone())
+				});
+			}
 			WorldUpdate::BlockRegion(region) => {
 				let chunk_x = region.start_x.div_euclid(16);
 				let chunk_z = region.start_z.div_euclid(16);
@@ -91,19 +90,15 @@ impl World {
 
 				//get the chunk the region is updating or create a new one
 				let chunk = world
-					.entry((chunk_x,chunk_z))
+					.entry((chunk_x, chunk_z))
 					//if the chunk is not currently loaded, create a new chunk and push it to the hashmap
 					.or_insert_with(|| {
-						Arc::new(
-							Mutex::new(
-								Chunk {
-									x: chunk_x,
-									z: chunk_z,
-									palette: Vec::new(),
-									local_ids: vec![vec![vec![0u8; 16]; 128]; 16],
-								}
-							)
-						)
+						Arc::new(Mutex::new(Chunk {
+							x: chunk_x,
+							z: chunk_z,
+							palette: Vec::new(),
+							local_ids: vec![vec![vec![0u8; 16]; 128]; 16],
+						}))
 					})
 					.clone();
 
@@ -116,13 +111,12 @@ impl World {
 					.expect("Critical error in updating world model");
 
 				//get the local (chunk) coordinates of the orgin of the region
-				let region_orgin_local_coordinates = Self::global_to_local_coordinates(
-					&Coordinates {
+				let region_orgin_local_coordinates =
+					Self::global_to_local_coordinates(&Coordinates {
 						x: region.start_x,
 						y: region.start_y,
 						z: region.start_z,
-					}
-				);
+					});
 
 				//extract the local coordinates from the struct
 				let region_local_orgin_x = region_orgin_local_coordinates.x as usize;
@@ -134,32 +128,36 @@ impl World {
 					for current_region_offset_y in 0..region.size_y as usize {
 						for current_region_offset_z in 0..region.size_z as usize {
 							//get the old local id, convert to the global id, and then convert the global id to a new local id
-							let old_local_id = region.local_ids[current_region_offset_x][current_region_offset_y][current_region_offset_z];
-							let global_id = region.palette.get(old_local_id as usize).expect("Should not be None because that would make the region invalid");
-							let new_local_id = Self::get_or_push_local_id(
-								global_id,
-								&mut chunk, 
+							let old_local_id = region.local_ids[current_region_offset_x]
+								[current_region_offset_y][current_region_offset_z];
+							let global_id = region.palette.get(old_local_id as usize).expect(
+								"Should not be None because that would make the region invalid",
 							);
+							let new_local_id = Self::get_or_push_local_id(global_id, &mut chunk);
 
 							chunk.local_ids[region_local_orgin_x + current_region_offset_x]
-								[region_local_orgin_y + current_region_offset_y][region_local_orgin_z + current_region_offset_z] = new_local_id;
+								[region_local_orgin_y + current_region_offset_y]
+								[region_local_orgin_z + current_region_offset_z] = new_local_id;
 						}
 					}
 				}
-			},
+			}
 			//TODO: implement for entities
 			WorldUpdate::SingleEntity(entity) => (),
 			WorldUpdate::MultiEntity(entity) => (),
 			WorldUpdate::PlayerUpdate(position_and_look) => {
 				let _ = tx.send(WorldUpdate::PlayerUpdate(position_and_look));
-			},
+			}
 			WorldUpdate::NoEffect => (),
 		}
 	}
 
 	pub(crate) fn get_chunk(chunk_x: i32, chunk_z: i32) -> Option<Arc<Mutex<Chunk>>> {
 		//get a lock on the world
-		let world = WORLD_MODEL.chunks.lock().expect("Critical failure in obtaining world model");
+		let world = WORLD_MODEL
+			.chunks
+			.lock()
+			.expect("Critical failure in obtaining world model");
 
 		//get the chunk and return an Arc to it
 		return world.get(&(chunk_x, chunk_z)).cloned();
@@ -190,18 +188,18 @@ impl World {
 	pub(crate) fn get_block(position: Coordinates) -> Option<Block> {
 		//get the chunk
 		let chunk = Self::get_chunk_of_block(&position);
-		
+
 		//if the chunk is not loaded, we cannot get the block, so return None
 		if chunk.is_none() {
 			return None;
 		}
-		
+
 		//unwrap the chunk
 		let chunk = chunk.expect("Should not be None because we just checked that");
-		
+
 		//get a lock on the chunk
 		let chunk = chunk.lock().expect("Critical error in reading world state");
-		
+
 		//get the local (chunk) coordinates of the block
 		let region_orgin_local_coordinates = Self::global_to_local_coordinates(&position);
 
@@ -210,17 +208,19 @@ impl World {
 		let local_y = region_orgin_local_coordinates.y as usize;
 		let local_z = region_orgin_local_coordinates.z as usize;
 
-		return Some(
-			Block {
-				block_id: chunk.palette.get(chunk.local_ids[local_x][local_y][local_z] as usize).expect("Should not fail because that would make the chunk corrupted").to_owned(),
-				position: position,
-			}
-		);
+		return Some(Block {
+			block_id: chunk
+				.palette
+				.get(chunk.local_ids[local_x][local_y][local_z] as usize)
+				.expect("Should not fail because that would make the chunk corrupted")
+				.to_owned(),
+			position: position,
+		});
 	}
 
 	fn global_to_local_coordinates(global_coordinates: &Coordinates) -> Coordinates {
 		//get convert to local coordinates
-		Coordinates {		
+		Coordinates {
 			x: global_coordinates.x & 15, //and with 15 to get the (positive) remainder for the global coordinate, which is the coordinate relative to the orgin of the chunk
 			y: global_coordinates.y,
 			z: global_coordinates.z & 15,

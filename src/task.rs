@@ -1,4 +1,5 @@
-use crate::{behaviour::Behaviour, block::Coordinates};
+use crate::behaviour::Behaviour;
+use crate::block::Coordinates;
 
 pub(crate) enum Tasks {
 	GoTo(GoTo),
@@ -7,18 +8,22 @@ pub(crate) enum Tasks {
 	ClearRegion(ClearRegion),
 }
 
-pub(crate) fn to_behaviours(task: Tasks) -> Vec<Behaviour> {
-	match task {
-		Tasks::GoTo(task) => GoTo::to_behaviours(task),
-		Tasks::Gather(task) => Gather::to_behaviours(task),
-		Tasks::FindItem(task) => FindItem::to_behaviours(task),
-		Tasks::ClearRegion(task) => ClearRegion::to_behaviours(task),
-	}
+pub(crate) fn to_behaviours(task: Tasks) { //-> Vec<Behaviour> {
+	//match task {
+	//	Tasks::GoTo(task) => GoTo::to_behaviours(task),
+	//	Tasks::Gather(task) => Gather::to_behaviours(task),
+	//	Tasks::FindItem(task) => FindItem::to_behaviours(task),
+	//	Tasks::ClearRegion(task) => ClearRegion::to_behaviours(task),
+	//}
 }
 
 //Pathfind to a position and generate the required actions to get there
 pub(crate) struct GoTo {
 	pub(crate) position: Coordinates,
+}
+
+impl GoTo {
+	pub(crate) fn to_behaviours() {}
 }
 
 //Gather a specified amount of an item. Can do this by mining or collecting from storage containers
