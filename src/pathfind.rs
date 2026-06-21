@@ -33,4 +33,18 @@ impl Path {
 	//paper's description is confusing. will fill in as needed
 	fn initialize() {
 	}
+
+	fn update_vertex(u: &Coordinates) {
+		if u != s_goal {
+			rhs(u) = Org::min(c(u, s_prime) + g(s_prime));
+		}
+
+		if u in U {
+			U.remove(u);
+		}
+
+		if g(u) != rhs(u) {
+			U.insert(u, calculate_key(u));
+		}
+	}
 }
