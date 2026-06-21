@@ -23,7 +23,7 @@ pub(crate) struct Path {
 
 //fns are implemented as defined in the D* lite paper
 impl Path {
-	fn calculate_key(s_start: &Coordinates, s: &Coordinates) -> u32 {
+	fn calculate_key(&mut self, s_start: &Coordinates, s: &Coordinates) -> u32 {
 		return (
 			Ord::min(g(s), rhs(s) + h(s_start, s)) + k_m,
 			min(g(s), rhs(s)),
@@ -31,10 +31,10 @@ impl Path {
 	}
 
 	//paper's description is confusing. will fill in as needed
-	fn initialize() {
+	fn initialize(&mut self) {
 	}
 
-	fn update_vertex(u: &Coordinates) {
+	fn update_vertex(&mut self, u: &Coordinates) {
 		if u != s_goal {
 			rhs(u) = Org::min(c(u, s_prime) + g(s_prime));
 		}
@@ -48,7 +48,7 @@ impl Path {
 		}
 	}
 
-	fn compute_shortest_path() {
+	fn compute_shortest_path(&mut self) {
 		while U.top_key() < calculate_key(s_start) || rhs(s_start) != g(s_start) {
 			k_old = U.top_key();
 			u = U.pop();
@@ -65,6 +65,24 @@ impl Path {
 					update_vertex(s);
 				}
 			}
+		}
+	}
+
+	//called Main() in paper, but compute_path makes more sense
+	fn compute_path(&mut self) {
+		let s_last = self.s_start;
+		self.initialize();
+		self.compute_path();
+		while(s_start != s_goal) {
+			s_start = c(s_start, s_prime) + g(s_prime); //s_prime is an element of succ(s_start) such that the value of this expression is minimized
+		//scan for changed edge costs
+		//if edge cost changed
+			k_m = k_m + h(s_last, s_start);
+			s_last = s_start;
+			//for directed edge (u, v) with changed edge costs
+				//update edge cost c(u, v);
+				self.update_vertex(u);
+			self.compute_shortest_path();
 		}
 	}
 }
