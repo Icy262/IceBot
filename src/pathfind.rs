@@ -166,5 +166,34 @@ impl Path {
 		return head_price + feet_price + support_price;
 	}
 
-
+	//not sure how to implement. returning the coordinates of nodes already in the graph may cause the algorithm to overflow and crash. if this happens, consider checking vertice presence in the list of nodes before adding it to the return vec
+	//returns the predecessors of s on the graph
+	fn pred(s: &Coordinates) -> Vec<Coordinates> {
+		return vec![
+			Coordinates {
+				x: s.x + 1,
+				..*s
+			},
+			Coordinates {
+				x: s.x - 1,
+				..*s
+			},
+			Coordinates {
+				y: s.y + 1,
+				..*s
+			},
+			Coordinates {
+				y: s.y - 1,
+				..*s
+			},
+			Coordinates {
+				z: s.z + 1,
+				..*s
+			},
+			Coordinates {
+				z: s.z + 1,
+				..*s
+			},
+		];
+	}
 }
