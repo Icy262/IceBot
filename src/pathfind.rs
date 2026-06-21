@@ -29,4 +29,8 @@ impl Path {
 			min(g(s), rhs(s)),
 		);
 	}
+
+	//paper's description is confusing. will fill in as needed
+	fn initialize() {
+	}
 }
