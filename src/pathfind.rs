@@ -47,4 +47,24 @@ impl Path {
 			U.insert(u, calculate_key(u));
 		}
 	}
+
+	fn compute_shortest_path() {
+		while U.top_key() < calculate_key(s_start) || rhs(s_start) != g(s_start) {
+			k_old = U.top_key();
+			u = U.pop();
+			if(k_old < calculate_key(u)) {
+				U.insert(u, calculate_key(u));
+			} else if g(u) > rhs(u) {
+				g(u) = rhs(u);
+				for s in pred(u) {
+					update_vertex(s);
+				}
+			} else {
+				g(u) = u32::MAX;
+				for s in (pred(u) || u) {
+					update_vertex(s);
+				}
+			}
+		}
+	}
 }
