@@ -227,4 +227,16 @@ impl Path {
 			},
 		];
 	}
+
+	//returns the value of g(s_prime) + c(s_prime, s) where s_prime is the pred(s) that produces the smallest value
+	fn rhs(&self, s: &Coordinates) -> u32 {
+		if s == self.s_start {
+			return 0;
+		} else {
+			return Path::pred(s)
+				.iter()
+				.map(|s_prime| g(s_prime) + c(s_prime, s))
+				.min();
+		}
+	}
 }
