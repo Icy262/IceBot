@@ -12,6 +12,7 @@ use crate::world::World;
 //http://www.cs.cmu.edu/~maxim/files/dlitemap_iros02.pdf
 //http://www.cs.cmu.edu/~maxim/files/dlite_icra02.pdf
 
+//all coordinates refer to foot position unless specified otherwise
 pub(crate) struct Path {
 	//Starting position of player
 	s_start: Coordinates,
@@ -164,4 +165,6 @@ impl Path {
 
 		return head_price + feet_price + support_price;
 	}
+
+
 }
