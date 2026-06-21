@@ -196,4 +196,35 @@ impl Path {
 			},
 		];
 	}
+
+	//just used same implementation of pred, not sure if this is right
+	//returns the successors of s on the graph
+	fn succ(s: &Coordinates) -> Vec<Coordinates> {
+		return vec![
+			Coordinates {
+				x: s.x + 1,
+				..*s
+			},
+			Coordinates {
+				x: s.x - 1,
+				..*s
+			},
+			Coordinates {
+				y: s.y + 1,
+				..*s
+			},
+			Coordinates {
+				y: s.y - 1,
+				..*s
+			},
+			Coordinates {
+				z: s.z + 1,
+				..*s
+			},
+			Coordinates {
+				z: s.z + 1,
+				..*s
+			},
+		];
+	}
 }
