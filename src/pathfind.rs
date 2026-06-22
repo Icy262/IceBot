@@ -12,14 +12,24 @@ use crate::world::World;
 //http://www.cs.cmu.edu/~maxim/files/dlitemap_iros02.pdf
 //http://www.cs.cmu.edu/~maxim/files/dlite_icra02.pdf
 
+//stores the required data for D* lite to work with a node
+struct Node {
+	//on the path from this node to the goal, the next node/the previous node on the graph (because the graph orgiginates at the goal and works backwards)
+	previous: Coordinates,
+	//one step look ahead based on g. see paper for more details
+	rhs: u32,
+	//cost to goal. we know this because we know the rest of the path to the goal
+	g: u32,
+}
+
 //all coordinates refer to foot position unless specified otherwise
 pub(crate) struct Path {
 	//Starting position of player
 	s_start: Coordinates,
 	//Desired destination of player. This is where the seach starts (see D* lite for reasoning)
 	s_goal: Coordinates,
-	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate and the price to get to that coordinate from the end coordinate. This is done because it is faster and more space efficient than storing a vec of nodes
-	nodes: HashMap<Coordinates, (u32, Coordinates)>,
+	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate, plus some other data D* lite requires. This is done because it is faster and more space efficient than storing a vec of nodes
+	nodes: HashMap<Coordinates, Node>,
 	//priority queue
 	U: BinaryHeap<State>,
 	//unsure what this does. TODO: figure out what it is
