@@ -241,6 +241,12 @@ impl Path {
 				.min();
 		}
 	}
+
+	//returns the estimated cost to goal
+	//this heuristic sucks, TODO: improve
+	fn g(&self, s: &Coordinates) -> u32 {
+		return abs(self.s_goal.x - s.x) + abs(self.s_goal.y - s.y) + abs(self.s_goal.z - s.z);
+	}
 }
 
 //from https://doc.rust-lang.org/std/collections/binary_heap/index.html
