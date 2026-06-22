@@ -21,15 +21,17 @@ pub(crate) struct Path {
 	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate and the price to get to that coordinate from the end coordinate. This is done because it is faster and more space efficient than storing a vec of nodes
 	nodes: HashMap<Coordinates, (u32, Coordinates)>,
 	//priority queue
-	U: BinaryHeap<State>
+	U: BinaryHeap<State>,
+	//unsure what this does. TODO: figure out what it is
+	k_m: u32,
 }
 
 //fns are implemented as defined in the D* lite paper
 impl Path {
-	fn calculate_key(&mut self, s_start: &Coordinates, s: &Coordinates) -> u32 {
+	fn calculate_key(&mut self, s_start: &Coordinates, s: &Coordinates) -> (u32, u32) {
 		return (
-			Ord::min(g(s), rhs(s) + h(s_start, s)) + k_m,
-			min(g(s), rhs(s)),
+			Ord::min(self.g(s), self.rhs(s) + self.h(s_start, s)) + k_m,
+			Ord::min(self.g(s), self.rhs(s)),
 		);
 	}
 
