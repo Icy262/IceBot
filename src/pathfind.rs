@@ -80,18 +80,33 @@ impl Path {
 
 	//called Main() in paper, but compute_path makes more sense
 	fn compute_path(&mut self) {
-		let s_last = self.s_start;
+		let mut s_last = self.s_start;
 		self.initialize();
-		self.compute_path();
-		while(s_start != s_goal) {
-			s_start = c(s_start, s_prime) + g(s_prime); //s_prime is an element of succ(s_start) such that the value of this expression is minimized
-		//scan for changed edge costs
-		//if edge cost changed
-			k_m = k_m + h(s_last, s_start);
-			s_last = s_start;
-			//for directed edge (u, v) with changed edge costs
-				//update edge cost c(u, v);
-				self.update_vertex(u);
+		self.compute_shortest_path();
+		while(self.s_start != self.s_goal) {
+			self.s_start = c(s_start, s_prime) + g(s_prime); //the value of this expression is the value of s_prime that minimizes the expression. s_prime is an element of succ(s_start) such that the value of this expression is minimized
+			//move to s_start
+			//scan graph for changed edge costs
+			//if edge cost changed
+				self.k_m = self.k_m + self.h(s_last, self.s_start);
+				s_last = self.s_start;
+				//for all directed edges (u, v) with changed edge costs
+					let c_old = self.c(u, v);
+					//update edge cost c(u, v);
+					if c_old > self.c(u, v) {
+						if u != self.s_goal {
+							self.rhs(u) = Ord::min(self.rhs(u), self.c(u, v) + self.g(v));
+						}
+					}
+					else if self.rhs(u) == c_old + self.g(v) {
+						if u != self.s_goal {
+							self.rhs(u) = Path::pred(s)
+								.iter()
+								.map(|s_prime| self.c(s, s_prime) + self.g(s_prime))
+								.min();
+						}
+					}
+					self.update_vertex(u);
 			self.compute_shortest_path();
 		}
 	}
