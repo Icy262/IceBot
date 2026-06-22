@@ -259,7 +259,7 @@ impl Path {
 		} else {
 			return Path::pred(s)
 				.iter()
-				.map(|s_prime| g(s_prime) + c(s_prime, s))
+				.map(|s_prime| self.g(s_prime) + self.c(s_prime, s))
 				.min();
 		}
 	}
@@ -267,7 +267,7 @@ impl Path {
 	//returns the estimated cost to goal
 	//this heuristic sucks, TODO: improve
 	fn g(&self, s: &Coordinates) -> u32 {
-		return abs(self.s_goal.x - s.x) + abs(self.s_goal.y - s.y) + abs(self.s_goal.z - s.z);
+		return self.s_goal.x.abs_diff(s.x) + self.s_goal.y.abs_diff(s.y) + self.s_goal.z.abs_diff(s.z);
 	}
 }
 
