@@ -50,20 +50,29 @@ impl Path {
 	}
 
 	fn compute_shortest_path(&mut self) {
-		while U.top_key() < calculate_key(s_start) || rhs(s_start) != g(s_start) {
-			k_old = U.top_key();
-			u = U.pop();
-			if(k_old < calculate_key(u)) {
-				U.insert(u, calculate_key(u));
-			} else if g(u) > rhs(u) {
-				g(u) = rhs(u);
-				for s in pred(u) {
-					update_vertex(s);
+		while self.U.top_key() < self.calculate_key(self.s_start) || self.rhs(self.s_start) != self.g(self.s_start) {
+			let k_old = self.U.top_key();
+			let u = self.U.pop();
+			if(k_old < self.calculate_key(u)) {
+				self.U.insert(u, self.calculate_key(u));
+			} else if self.g(u) > self.rhs(u) {
+				self.g(u) = self.rhs(u);
+				for s in self.pred(u) {
+					self.update_vertex(s);
 				}
 			} else {
-				g(u) = u32::MAX;
-				for s in (pred(u) || u) {
-					update_vertex(s);
+				let g_old = self.g(u);
+				self.g(u) = u32::MAX;
+				for s in (self.pred(u) || u) {
+					if self.rhs(s) == self.c(s, u) + g_old || s == u {
+						if s != self.s_goal {
+							self.rhs(s) = Path::pred(s)
+								.iter()
+								.map(|s_prime| self.c(s, s_prime) + self.g(s_prime))
+								.min();
+						}
+					}
+					self.update_vertex(s);
 				}
 			}
 		}
