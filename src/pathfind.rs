@@ -28,9 +28,9 @@ pub(crate) struct Path {
 
 //fns are implemented as defined in the D* lite paper
 impl Path {
-	fn calculate_key(&mut self, s_start: &Coordinates, s: &Coordinates) -> (u32, u32) {
+	fn calculate_key(&mut self, s: &Coordinates) -> (u32, u32) {
 		return (
-			Ord::min(self.g(s), self.rhs(s) + self.h(s_start, s)) + k_m,
+			Ord::min(self.g(s), self.rhs(s) + self.h(self.s_start, s)) + self.k_m,
 			Ord::min(self.g(s), self.rhs(s)),
 		);
 	}
