@@ -40,16 +40,12 @@ impl Path {
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) {
-		if u != s_goal {
-			rhs(u) = Org::min(c(u, s_prime) + g(s_prime));
-		}
-
-		if u in U {
-			U.remove(u);
-		}
-
-		if g(u) != rhs(u) {
-			U.insert(u, calculate_key(u));
+		if self.g(u) != self.rhs(u) && u in self.U {
+			self.U.update(u, self.calculate_key(u));
+		} else if self.g(u) != self.rhs(u) && !(u in self.U) {
+			self.U.insert(u, self.calculate_key(u));
+		} else if self.g(u) == self.rhs(u) && u in self.U {
+			self.U.remove(u);
 		}
 	}
 
