@@ -29,7 +29,7 @@ pub(crate) struct Path {
 	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate, plus some other data D* lite requires. This is done because it is faster and more space efficient than storing a vec of nodes
 	nodes: HashMap<Coordinates, Node>,
 	//priority queue
-	U: BinaryHeap<State>,
+	U: PriorityQueue,
 	//unsure what this does. TODO: figure out what it is
 	k_m: u32,
 }
