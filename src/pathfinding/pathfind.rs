@@ -1,10 +1,8 @@
-use std::cmp::{Ordering, min_by};
-use std::collections::{HashMap, BinaryHeap};
-
 use crate::BLOCK_REGISTRY;
 use crate::block::Coordinates;
 use crate::registry::block_type::Collision;
 use crate::world::World;
+use crate::pathfinding::priority_queue::{PriorityQueue, Key};
 
 //Uses D* lite with post processing to smooth paths
 //References:
@@ -38,11 +36,13 @@ pub(crate) struct Path {
 
 //fns are implemented as defined in the D* lite paper
 impl Path {
-	fn calculate_key(&mut self, s: &Coordinates) -> Option<(u32, u32)> {
-		return Some((
-			Ord::min(self.nodes.get(s)?.g, self.nodes.get(s)?.rhs + self.h(self.s_start, s)) + self.k_m,
-			Ord::min(self.nodes.get(s)?.g, self.nodes.get(s)?.rhs),
-		));
+	fn calculate_key(&mut self, s: &Coordinates) -> Option<Key> {
+		return Some(
+			Key {
+				k_1: Ord::min(self.nodes.get(s)?.g, self.nodes.get(s)?.rhs + self.h(self.s_start, s)) + self.k_m,
+				k_2: Ord::min(self.nodes.get(s)?.g, self.nodes.get(s)?.rhs),
+			}
+		);
 	}
 
 	//paper's description is confusing. will fill in as needed
@@ -280,31 +280,4 @@ impl Path {
 	fn g(&self, s: &Coordinates) -> u32 {
 		return self.s_goal.x.abs_diff(s.x) + self.s_goal.y.abs_diff(s.y) + self.s_goal.z.abs_diff(s.z);
 	}
-}
-
-//from https://doc.rust-lang.org/std/collections/binary_heap/index.html
-#[derive(Copy, Clone, Eq, PartialEq)]
-struct State {
-    cost: usize,
-    position: Coordinates,
-}
-
-// The priority queue depends on `Ord`.
-// Explicitly implement the trait so the queue becomes a min-heap
-// instead of a max-heap.
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> Ordering {
-        // Notice that we flip the ordering on costs.
-        // In case of a tie we compare positions - this step is necessary
-        // to make implementations of `PartialEq` and `Ord` consistent.
-        other.cost.cmp(&self.cost)
-            .then_with(|| self.position.cmp(&other.position))
-    }
-}
-
-// `PartialOrd` needs to be implemented as well.
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
 }
