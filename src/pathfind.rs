@@ -50,11 +50,12 @@ impl Path {
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) {
-		if self.g(u) != self.rhs(u) && u in self.U {
+		let node = self.nodes.get(u);
+		if self.nodes.get(u).g != self.nodes.get(u).rhs && u in self.U. {
 			self.U.update(u, self.calculate_key(u));
-		} else if self.g(u) != self.rhs(u) && !(u in self.U) {
+		} else if self.nodes.get(u).g != self.nodes.get(u).rhs && !(u in self.U) {
 			self.U.insert(u, self.calculate_key(u));
-		} else if self.g(u) == self.rhs(u) && u in self.U {
+		} else if self.nodes.get(u).g == self.nodes.get(u).rhs && u in self.U {
 			self.U.remove(u);
 		}
 	}
