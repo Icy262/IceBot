@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use flate2::Status::Ok;
+
 use crate::BLOCK_REGISTRY;
 use crate::block::Coordinates;
 use crate::registry::block_type::Collision;
@@ -66,35 +68,42 @@ impl Path {
 		return Ok(());
 	}
 
-	fn compute_shortest_path(&mut self) {
-		while U.TopKey() < CalculateKet(s_start) || rhs(s_start) != g(s_start) {
-			u = U.Top();
-			k_old = U.TopKey();
-			k_new = CalculateKey(u)
+	//outside behaviour should be the same as the function in the paper. internal mechanics differ slightly
+	fn compute_shortest_path(&mut self) -> Result {
+		while U.TopKey() < CalculateKey(s_start) || rhs(s_start) != g(s_start) {
+			let (u, k_old) = self.U.pop()?;
+			let k_new = self.calculate_key(u)?;
+			
+			let node_u = self.nodes.get(&u)?;
 			if k_old < k_new {
-				U.Update(u, k_new);
-			} else if g(u) > rhs(u) {
-				g(u) = rhs(u);
-				U.Remove(u);
-				for s in pred(u) {
-					if s != s_goal {
-						rhs(s) = min(rhs(s), c(s, u) + g(u));
+				self.U.insert_or_update(&u, k_new);
+			} else if node_u.g > node_u.rhs {
+				node_u.g = node_u.rhs;
+				for s in Path::pred(&u) {
+					if s != self.s_goal {
+						let node_s = self.nodes.get(&s)?;
+						node_s.rhs = Ord::min(node_s.rhs, Path::c(&s, &u) + self.g(&u));
 					}
-					UpdateVertex(s);
+					self.update_vertex(&s)?;
 				}
 			} else {
-				g_old = g(u);
-				g(u) = u32::MAX
-				for all s in (pred(u) || u) {
-					if rhs(s) == c(s, u) + g_old || s = u {
-						if s != s_goal {
-							rhs(s) = bellman(s, s_prime);
+				let g_old = node_u.g;
+				node_u.g = u32::MAX;
+				let u_self_and_adjacent = Self::pred(&u);
+				u_self_and_adjacent.push(u);
+				for s in u_self_and_adjacent {
+					let node_s = self.nodes.get(&s)?;
+					if node_s.rhs == Path::c(&s, &u) + g_old || s == u {
+						if s != self.s_goal {
+							node_s.rhs = self.bellman(s, s_prime);
 						}
 					}
-					UpdateVertex(s);
+					self.update_vertex(&s)?;
 				}
 			}
 		}
+
+		return Ok(());
 	}
 
 	//called Main() in paper, but compute_path makes more sense
