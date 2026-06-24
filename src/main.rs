@@ -18,7 +18,10 @@ mod movements;
 mod network_connection;
 mod packet_processor;
 mod packets;
-mod pathfind;
+mod pathfinding {
+	pub(crate) mod pathfind;
+	mod priority_queue;
+}
 mod physics;
 mod player;
 mod task;
