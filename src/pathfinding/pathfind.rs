@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::BLOCK_REGISTRY;
 use crate::block::Coordinates;
 use crate::registry::block_type::Collision;
@@ -13,11 +15,11 @@ use crate::pathfinding::priority_queue::{PriorityQueue, Key};
 //stores the required data for D* lite to work with a node
 struct Node {
 	//on the path from this node to the goal, the next node/the previous node on the graph (because the graph orgiginates at the goal and works backwards)
-	previous: Coordinates,
+	pub(super) previous: Coordinates,
 	//one step look ahead based on g. see paper for more details
-	rhs: u32,
+	pub(super) rhs: u32,
 	//cost to goal. we know this because we know the rest of the path to the goal
-	g: u32,
+	pub(super) g: u32,
 }
 
 //all coordinates refer to foot position unless specified otherwise
@@ -27,7 +29,7 @@ pub(crate) struct Path {
 	//Desired destination of player. This is where the seach starts (see D* lite for reasoning)
 	s_goal: Coordinates,
 	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate, plus some other data D* lite requires. This is done because it is faster and more space efficient than storing a vec of nodes
-	nodes: HashMap<Coordinates, Node>,
+	pub(super) nodes: HashMap<Coordinates, Node>,
 	//priority queue
 	U: PriorityQueue,
 	//unsure what this does. TODO: figure out what it is
@@ -37,10 +39,12 @@ pub(crate) struct Path {
 //fns are implemented as defined in the D* lite paper
 impl Path {
 	fn calculate_key(&mut self, s: &Coordinates) -> Option<Key> {
+		let node = self.nodes.get(s)?;
+		
 		return Some(
 			Key {
-				k_1: Ord::min(self.nodes.get(s)?.g, self.nodes.get(s)?.rhs + self.h(self.s_start, s)) + self.k_m,
-				k_2: Ord::min(self.nodes.get(s)?.g, self.nodes.get(s)?.rhs),
+				k_1: Ord::min(node.g, node.rhs + self.h(self.s_start, s)) + self.k_m,
+				k_2: Ord::min(node.g, node.rhs),
 			}
 		);
 	}
@@ -49,15 +53,17 @@ impl Path {
 	fn initialize(&mut self) {
 	}
 
-	fn update_vertex(&mut self, u: &Coordinates) {
+	fn update_vertex(&mut self, u: &Coordinates) -> Result {
 		let node = self.nodes.get(u);
-		if self.nodes.get(u).g != self.nodes.get(u).rhs && u in self.U. {
-			self.U.update(u, self.calculate_key(u));
-		} else if self.nodes.get(u).g != self.nodes.get(u).rhs && !(u in self.U) {
-			self.U.insert(u, self.calculate_key(u));
-		} else if self.nodes.get(u).g == self.nodes.get(u).rhs && u in self.U {
-			self.U.remove(u);
+		let node_consistent = node.g == node.rhs;
+
+		if node_consistent {
+			self.U.remove(state);
+		} else {
+			self.U.insert_or_update(u, self.calculate_key(u).ok_or(Err(()))?);
 		}
+
+		return Ok(());
 	}
 
 	fn compute_shortest_path(&mut self) {
