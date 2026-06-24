@@ -70,10 +70,10 @@ impl PriorityQueue {
 	}
 
 	pub fn len(&self) -> usize {
-		self.key_map.len()
+		return self.key_map.len();
 	}
 
 	pub fn is_empty(&self) -> bool {
-		self.key_map.is_empty()
+		return self.key_map.is_empty();
 	}
 }
