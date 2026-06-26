@@ -15,6 +15,7 @@ use crate::pathfinding::priority_queue::{PriorityQueue, Key};
 //http://www.cs.cmu.edu/~maxim/files/dlite_icra02.pdf
 
 //stores the required data for D* lite to work with a node
+#[derive(Clone, Copy)]
 struct Node {
 	//on the path from this node to the goal, the next node/the previous node on the graph (because the graph orgiginates at the goal and works backwards)
 	pub(super) previous: Coordinates,
@@ -45,7 +46,7 @@ impl Path {
 
 		return Some(
 			Key {
-				k_1: Ord::min(node.g, node.rhs + self.h(self.s_start, s)) + self.k_m,
+				k_1: Ord::min(node.g, node.rhs + self.h(&self.s_start, s)) + self.k_m,
 				k_2: Ord::min(node.g, node.rhs),
 			}
 		);
@@ -54,55 +55,60 @@ impl Path {
 	//TODO: implement remainder, per paper
 	fn initialize(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
 		return Path {
-			s_start: *s_start,
-			s_goal: *s_goal,
+			s_start: (*s_start).clone(),
+			s_goal: (*s_goal).clone(),
 			nodes: HashMap::new(),
 			U: PriorityQueue::new(),
 			k_m: 0,
 		}
 	}
 
-	fn update_vertex(&mut self, u: &Coordinates) -> Result {
-		let node = self.nodes.get(u)?;
+	fn update_vertex(&mut self, u: &Coordinates) -> Result<(), &'static str> {
+		let node = self.nodes.get(u).ok_or("u not found")?;
 		let node_consistent = node.g == node.rhs;
 
 		if node_consistent {
-			self.U.remove(state);
+			self.U.remove(u);
 		} else {
-			self.U.insert_or_update(u, self.calculate_key(u).ok_or(Err(()))?);
+			let key = self.calculate_key(u).ok_or("insert or update failed")?;
+			self.U.insert_or_update(u, &key);
 		}
 
-		return Ok(());
+		return Result::Ok(());
 	}
 
 	//outside behaviour should be the same as the function in the paper. internal mechanics differ slightly
-	fn compute_shortest_path(&mut self) -> Result {
-		while U.TopKey() < CalculateKey(s_start) || rhs(s_start) != g(s_start) {
-			let (u, k_old) = self.U.pop()?;
-			let k_new = self.calculate_key(u)?;
+	fn compute_shortest_path(&mut self) -> Result<(), &'static str> {
+		let s_start_node = (*self.nodes.get(&self.s_start).ok_or("start node not defined")?).clone();
+		let s_start_key = self.calculate_key(&(self.s_start.clone())).ok_or("start node not defined")?;
+		while self.U.peek().ok_or("no solution exists")?.1 < s_start_key || s_start_node.rhs != s_start_node.g {
+			let (u, k_old) = self.U.pop().ok_or("no solution exists")?;
+			let k_new = self.calculate_key(&u).ok_or("could not calculate key")?;
 			
-			let node_u = self.nodes.get(&u)?;
+			let node_u = self.nodes.get_mut(&u).ok_or("could not find node")?;
 			if k_old < k_new {
-				self.U.insert_or_update(&u, k_new);
+				self.U.insert_or_update(&u, &k_new);
 			} else if node_u.g > node_u.rhs {
 				node_u.g = node_u.rhs;
 				for s in Path::pred(&u) {
 					if s != self.s_goal {
-						let node_s = self.nodes.get(&s)?;
-						node_s.rhs = Ord::min(node_s.rhs, Path::c(&s, &u) + self.g(&u));
+						let g = self.nodes.get(&u).ok_or("could not find node")?.g;
+						let node_s = self.nodes.get_mut(&s).ok_or("could not find node")?;
+						node_s.rhs = Ord::min(node_s.rhs, Path::c(&s, &u) + g);
 					}
 					self.update_vertex(&s)?;
 				}
 			} else {
 				let g_old = node_u.g;
 				node_u.g = u32::MAX;
-				let u_self_and_adjacent = Self::pred(&u);
+				let mut u_self_and_adjacent = Self::pred(&u);
 				u_self_and_adjacent.push(u);
 				for s in u_self_and_adjacent {
-					let node_s = self.nodes.get(&s)?;
+					let bellman = self.bellman(&s)?;
+					let node_s = self.nodes.get_mut(&s).ok_or("could not find node")?;
 					if node_s.rhs == Path::c(&s, &u) + g_old || s == u {
 						if s != self.s_goal {
-							node_s.rhs = self.bellman(&s);
+							node_s.rhs = bellman;
 						}
 					}
 					self.update_vertex(&s)?;
@@ -110,30 +116,30 @@ impl Path {
 			}
 		}
 
-		return Ok(());
+		return Result::Ok(());
 	}
 
 	//called Main() in paper, but compute_path makes more sense
-	fn compute_path(&mut self) {
-		let mut s_last = self.s_start;
-		self.initialize();
-		self.compute_shortest_path();
-		while(self.s_start != self.s_goal) {
-			let s_start = self.bellman(&s_start);
-			//move to s_start
-			//scan graph for changed edge costs
-			//if edge cost changed
-				self.k_m = self.k_m + self.h(s_last, self.s_start);
-				s_last = self.s_start;
-				//for all directed edges (u, v) with changed edge costs
-					//we don't know the old cost. this means we always need to call bellman instead of being able to take a shortcut in the case where cost decreases. if this loop is too slow, consider storing old costs. that will trade memory usage for cpu
-					if u != self.s_goal {
-						self.rhs(u) = self.bellman(&u);
-					}
-					self.update_vertex(u);
-			self.compute_shortest_path();
-		}
-	}
+	//fn compute_path(&mut self) {
+	//	let mut s_last = self.s_start;
+	//	self.initialize();
+	//	self.compute_shortest_path();
+	//	while(self.s_start != self.s_goal) {
+	//		let s_start = self.bellman(&s_start);
+	//		//move to s_start
+	//		//scan graph for changed edge costs
+	//		//if edge cost changed
+	//			self.k_m = self.k_m + self.h(s_last, self.s_start);
+	//			s_last = self.s_start;
+	//			//for all directed edges (u, v) with changed edge costs
+	//				//we don't know the old cost. this means we always need to call bellman instead of being able to take a shortcut in the case where cost decreases. if this loop is too slow, consider storing old costs. that will trade memory usage for cpu
+	//				if u != self.s_goal {
+	//					self.rhs(u) = self.bellman(&u);
+	//				}
+	//				self.update_vertex(u);
+	//		self.compute_shortest_path();
+	//	}
+	//}
 
 	//cost of moving from s to s_prime where s_prime is succ(s)
 	fn c(s: &Coordinates, s_prime: &Coordinates) -> u32{
@@ -277,20 +283,21 @@ impl Path {
 	}
 
 	//returns the value of g(s_prime) + c(s_prime, s) where s_prime is the pred(s) that produces the smallest value
-	fn rhs(&self, s: &Coordinates) -> u32 {
-		if s == self.s_start {
-			return 0;
+	fn bellman(&self, s: &Coordinates) -> Result<u32, &'static str> {
+		if *s == self.s_start {
+			return Result::Ok(0);
 		} else {
-			return Path::pred(s)
-				.iter()
-				.map(|s_prime| self.g(s_prime) + self.c(s_prime, s))
-				.min();
+			let mut result = u32::MAX;
+			for s_prime in Path::pred(s) {
+				result = Ord::min(result, self.nodes.get(&s_prime).ok_or("could not find node")?.g + Path::c(&s_prime, s));
+			}
+			return Result::Ok(result);
 		}
 	}
 
-	//returns the estimated cost to goal
+	//returns the estimated cost between two points
 	//this heuristic sucks, TODO: improve
-	fn g(&self, s: &Coordinates) -> u32 {
-		return self.s_goal.x.abs_diff(s.x) + self.s_goal.y.abs_diff(s.y) + self.s_goal.z.abs_diff(s.z);
+	fn h(&self, s: &Coordinates, s_prime: &Coordinates) -> u32 {
+		return s.x.abs_diff(s_prime.x) + s.y.abs_diff(s_prime.y) + s.z.abs_diff(s_prime.z);
 	}
 }

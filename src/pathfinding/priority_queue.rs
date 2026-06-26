@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 
 use crate::block::Coordinates;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone, Copy)]
 pub(super) struct Key {
 	pub(super) k_1: u32,
 	pub(super) k_2: u32,
@@ -26,7 +26,7 @@ impl PartialOrd for Key {
 
 pub(super) struct PriorityQueue {
 	//sorted from min to max for D* lite
-	priority_queue: Binarypriority_queue<(Reverse<Key>, Coordinates)>,
+	priority_queue: BinaryHeap<(Reverse<Key>, Coordinates)>,
 	//quick lookup key
 	key_map: HashMap<Coordinates, Key>,
 }
@@ -39,9 +39,9 @@ impl PriorityQueue {
 		}
 	}
 
-	pub fn insert_or_update(&mut self, state: &Coordinates, key: Key) {
-		self.key_map.insert(*state, key);
-		self.priority_queue.push((Reverse(key), state));
+	pub fn insert_or_update(&mut self, state: &Coordinates, key: &Key) {
+		self.key_map.insert(*state, *key);
+		self.priority_queue.push((Reverse(*key), *state));
 	}
 
 	pub fn contains(&self, state: &Coordinates) -> bool {
@@ -54,6 +54,22 @@ impl PriorityQueue {
 				Some(&key_map_key) => {
 					if key_map_key == key {
 						self.key_map.remove(&state);
+						return Some((state, key));
+					}
+				},
+				None => continue,
+			}
+		}
+		
+		return None;
+	}
+
+	//like pop but does not delete the returned value
+	pub fn peek(&mut self) -> Option<(Coordinates, Key)> {
+		while let Some((Reverse(key), state)) = self.priority_queue.pop() {
+			match self.key_map.get(&state) {
+				Some(&key_map_key) => {
+					if key_map_key == key {
 						return Some((state, key));
 					}
 				},
