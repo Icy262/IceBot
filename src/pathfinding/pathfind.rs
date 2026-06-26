@@ -95,7 +95,7 @@ impl Path {
 					let node_s = self.nodes.get(&s)?;
 					if node_s.rhs == Path::c(&s, &u) + g_old || s == u {
 						if s != self.s_goal {
-							node_s.rhs = self.bellman(s, s_prime);
+							node_s.rhs = self.bellman(&s);
 						}
 					}
 					self.update_vertex(&s)?;
@@ -112,7 +112,7 @@ impl Path {
 		self.initialize();
 		self.compute_shortest_path();
 		while(self.s_start != self.s_goal) {
-			self.s_start = c(s_start, s_prime) + g(s_prime); //the value of this expression is the value of s_prime that minimizes the expression. s_prime is an element of succ(s_start) such that the value of this expression is minimized
+			let s_start = self.bellman(&s_start);
 			//move to s_start
 			//scan graph for changed edge costs
 			//if edge cost changed
