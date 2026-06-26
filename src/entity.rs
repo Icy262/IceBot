@@ -1,4 +1,4 @@
-use crate::data_types::MCMetadata;
+use crate::network::data_types::MCMetadata;
 
 pub(crate) struct EntityPositionAndLook {
 	pub(crate) x: f64,

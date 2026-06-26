@@ -1,5 +1,5 @@
 use crate::movements::Movements;
-use crate::packets::Packets;
+use crate::network::packets::Packets;
 use crate::{
 	block::{self, Block, Coordinates},
 	bot::PLAYER,

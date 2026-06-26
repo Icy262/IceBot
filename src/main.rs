@@ -10,14 +10,16 @@ mod actions;
 mod behaviour;
 mod block;
 mod bot;
-mod data_types;
 mod entity;
 mod item;
 mod movement_translator;
 mod movements;
-mod network_connection;
-mod packet_processor;
-mod packets;
+mod network {
+	pub(crate) mod data_types;
+	pub(crate) mod network_connection;
+	pub(crate) mod packet_processor;
+	pub(crate) mod packets;
+}
 mod pathfinding {
 	pub(crate) mod pathfind;
 	mod priority_queue;

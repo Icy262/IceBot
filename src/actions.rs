@@ -1,6 +1,6 @@
 use crate::action_translator;
 use crate::block::{Block, Coordinates, Direction};
-use crate::packets::{Packets, write_packet};
+use crate::network::packets::{Packets, write_packet};
 use std::net::TcpStream;
 
 pub(crate) enum Actions {

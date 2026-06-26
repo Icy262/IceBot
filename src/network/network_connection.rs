@@ -1,5 +1,6 @@
 use crate::world::WorldUpdate;
-use crate::{packet_processor::process_packet, packets::read_packet, world::World};
+use crate::network::{packet_processor::process_packet, packets::read_packet};
+use crate::world::World;
 use std::net::TcpStream;
 use std::sync::mpsc::Sender;
 

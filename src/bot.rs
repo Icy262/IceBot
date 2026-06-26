@@ -10,13 +10,15 @@ use std::{cell::RefCell, collections::LinkedList};
 use crate::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
 use crate::behaviour::Behaviour;
 use crate::block::{self, Block, Coordinates};
-use crate::data_types::{MCBool, MCDouble, MCFloat};
-use crate::data_types::{MCMetadata, MCUByte};
+use crate::network::data_types::{MCBool, MCDouble, MCFloat};
+use crate::network::data_types::{MCMetadata, MCUByte};
 use crate::movements::{Jump, Movements, NoInput, Walk, do_movement};
-use crate::packets::{KeepAlive, Packets, PlayerPositionandLook};
+use crate::network::packets::{KeepAlive, Packets, PlayerPositionandLook};
 use crate::world::{World, WorldUpdate};
-use crate::{behaviour, network_connection};
-use crate::{packets::write_packet, player::Player};
+use crate::behaviour;
+use crate::network::network_connection;
+use crate::network::packets::write_packet;
+use crate::player::Player;
 
 thread_local! {
 	pub(crate) static PLAYER: RefCell<Player> = RefCell::new(

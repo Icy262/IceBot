@@ -89,7 +89,7 @@ fn generate_data_types(version: &String) {
 	}
 
 	//write to data types
-	fs::write("src/data_types.rs", output_code).unwrap();
+	fs::write("src/network/data_types.rs", output_code).unwrap();
 }
 
 fn generate_packets(version: &String) {
@@ -208,7 +208,7 @@ fn generate_packets(version: &String) {
 	}
 
 	//write to packets
-	fs::write("src/packets.rs", output_code).unwrap();
+	fs::write("src/network/packets.rs", output_code).unwrap();
 }
 
 fn generate_action_translation(version: &String) {
@@ -224,8 +224,8 @@ fn generate_action_translation(version: &String) {
 
 	//import all packets and data types because we don't know what we might need
 	output_code += "use crate::actions::Actions;\n";
-	output_code += "use crate::packets::*;\n";
-	output_code += "use crate::data_types::*;\n\n";
+	output_code += "use crate::network::packets::*;\n";
+	output_code += "use crate::network::data_types::*;\n\n";
 
 	//generate the to_packets for each individual action
 	for action in actions_spec {
@@ -360,7 +360,7 @@ fn generate_packet_processor(version: &String) {
 	output_code += "}\n\n";
 
 	//write to packet_processor
-	fs::write("src/packet_processor.rs", output_code).unwrap();
+	fs::write("src/network/packet_processor.rs", output_code).unwrap();
 }
 
 fn packet_enum_generator(spec: Yaml) -> String {
