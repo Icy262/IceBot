@@ -119,20 +119,9 @@ impl Path {
 				self.k_m = self.k_m + self.h(s_last, self.s_start);
 				s_last = self.s_start;
 				//for all directed edges (u, v) with changed edge costs
-					let c_old = self.c(u, v);
-					//update edge cost c(u, v);
-					if c_old > self.c(u, v) {
-						if u != self.s_goal {
-							self.rhs(u) = Ord::min(self.rhs(u), self.c(u, v) + self.g(v));
-						}
-					}
-					else if self.rhs(u) == c_old + self.g(v) {
-						if u != self.s_goal {
-							self.rhs(u) = Path::pred(s)
-								.iter()
-								.map(|s_prime| self.c(s, s_prime) + self.g(s_prime))
-								.min();
-						}
+					//we don't know the old cost. this means we always need to call bellman instead of being able to take a shortcut in the case where cost decreases. if this loop is too slow, consider storing old costs. that will trade memory usage for cpu
+					if u != self.s_goal {
+						self.rhs(u) = self.bellman(&u);
 					}
 					self.update_vertex(u);
 			self.compute_shortest_path();
