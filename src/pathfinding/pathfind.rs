@@ -31,7 +31,7 @@ pub(crate) struct Path {
 	//Desired destination of player. This is where the seach starts (see D* lite for reasoning)
 	s_goal: Coordinates,
 	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate, plus some other data D* lite requires. This is done because it is faster and more space efficient than storing a vec of nodes
-	pub(super) nodes: HashMap<Coordinates, Node>,
+	nodes: HashMap<Coordinates, Node>,
 	//priority queue
 	U: PriorityQueue,
 	//unsure what this does. TODO: figure out what it is
@@ -51,12 +51,19 @@ impl Path {
 		);
 	}
 
-	//paper's description is confusing. will fill in as needed
-	fn initialize(&mut self) {
+	//TODO: implement remainder, per paper
+	fn initialize(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
+		return Path {
+			s_start: *s_start,
+			s_goal: *s_goal,
+			nodes: HashMap::new(),
+			U: PriorityQueue::new(),
+			k_m: 0,
+		}
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) -> Result {
-		let node = self.nodes.get(u);
+		let node = self.nodes.get(u)?;
 		let node_consistent = node.g == node.rhs;
 
 		if node_consistent {
