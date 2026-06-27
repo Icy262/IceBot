@@ -1,5 +1,5 @@
 use crate::behaviour::behaviour::Behaviour;
-use crate::block::Coordinates;
+use crate::world::block::Coordinates;
 
 pub(crate) enum Tasks {
 	GoTo(GoTo),

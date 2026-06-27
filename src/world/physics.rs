@@ -1,10 +1,10 @@
 use crate::behaviour::movements::Movements;
 use crate::network::packets::Packets;
 use crate::{
-	block::{self, Block, Coordinates},
+	world::block::{self, Block, Coordinates},
 	bot::PLAYER,
 	player::Player,
-	world::{WORLD_MODEL, World},
+	world::world::{WORLD_MODEL, World},
 };
 
 //Not a perfect implementation, but good enough for now
@@ -31,7 +31,7 @@ pub(crate) fn process_motion(old_player: &Player) -> Player {
 	//check if player colliding with ground (block it is entering is not air)
 	if new_player.on_ground {
 		//check if should start falling
-		let block_below = World::get_block(crate::block::Coordinates {
+		let block_below = World::get_block(Coordinates {
 			x: new_player.x as i32,
 			y: new_player.y as i32 - 1,
 			z: new_player.z as i32,
@@ -52,7 +52,7 @@ pub(crate) fn process_motion(old_player: &Player) -> Player {
 	} else {
 		//check if player should stop falling
 		if new_player.y < old_player.y.floor() && old_player.y > old_player.y.floor() {
-			let block_below = World::get_block(crate::block::Coordinates {
+			let block_below = World::get_block(Coordinates {
 				x: new_player.x as i32,
 				y: new_player.y as i32 - 1,
 				z: new_player.z as i32,

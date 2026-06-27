@@ -1,5 +1,5 @@
 use crate::behaviour::action_translator;
-use crate::block::{Block, Coordinates, Direction};
+use crate::world::block::{Block, Coordinates, Direction};
 use crate::network::packets::{Packets, write_packet};
 use std::net::TcpStream;
 

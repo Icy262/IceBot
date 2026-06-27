@@ -12,9 +12,13 @@ mod behaviour {
 	pub(crate) mod action_translator;
 	pub(crate) mod actions;
 }
-mod block;
+mod world {
+	pub(crate) mod block;
+	pub(crate) mod entity;
+	pub(crate) mod physics;
+	pub(crate) mod world;
+}
 mod bot;
-mod entity;
 mod item;
 mod network {
 	pub(crate) mod data_types;
@@ -26,20 +30,18 @@ mod pathfinding {
 	pub(crate) mod pathfind;
 	mod priority_queue;
 }
-mod physics;
 mod player;
 mod task;
 mod tool;
-mod world;
 mod registry {
 	pub(crate) mod block_type;
 }
 
-use crate::block::Block;
-use crate::block::Coordinates;
+use crate::world::block::Block;
+use crate::world::block::Coordinates;
 use crate::block_type::{BlockType, build_block_type_registry};
 use crate::registry::block_type;
-use crate::world::World;
+use crate::world::world::World;
 
 static BLOCK_REGISTRY: LazyLock<HashMap<String, BlockType>> =
 	LazyLock::new(|| build_block_type_registry());

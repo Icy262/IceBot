@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use yaml_rust::{Yaml, YamlLoader};
 
-use crate::block;
+use crate::world::block;
 use crate::item::ItemType;
 use crate::registry::block_type::LightTransparency::Transparent;
 use crate::tool::ToolType;

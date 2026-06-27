@@ -1,11 +1,11 @@
-use crate::block::Block;
-use crate::world::WorldUpdate;
+use crate::world::block::Block;
+use crate::world::world::WorldUpdate;
 use crate::network::packets::Packets;
-use crate::block::Coordinates;
+use crate::world::block::Coordinates;
 use crate::network::data_types::*;
-use crate::entity::EntityPositionAndLook;
+use crate::world::entity::EntityPositionAndLook;
 use std::io::Read;
-use crate::world::Region;
+use crate::world::world::Region;
 use flate2::read::ZlibDecoder;
 
 pub(crate) fn process_packet(packet: Packets) -> WorldUpdate {

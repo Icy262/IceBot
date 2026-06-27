@@ -2,7 +2,7 @@ use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Reverse;
 use std::cmp::Ordering;
 
-use crate::block::Coordinates;
+use crate::world::block::Coordinates;
 
 #[derive(Eq, PartialEq, Clone, Copy)]
 pub(super) struct Key {

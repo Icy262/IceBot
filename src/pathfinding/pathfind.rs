@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use flate2::Status::Ok;
 
 use crate::BLOCK_REGISTRY;
-use crate::block::Coordinates;
+use crate::world::block::Coordinates;
 use crate::registry::block_type::Collision;
-use crate::world::World;
+use crate::world::world::World;
 use crate::pathfinding::priority_queue::{PriorityQueue, Key};
 
 //Uses D* lite with post processing to smooth paths

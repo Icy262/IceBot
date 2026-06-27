@@ -273,7 +273,7 @@ fn generate_movement_translation(version: &String) {
 	//import all packets and data types because we don't know what we might need
 	output_code += "use crate::network::packets::*;\n";
 	output_code += "use crate::bot::PLAYER;\n";
-	output_code += "use crate::physics::update_position;\n";
+	output_code += "use crate::world::physics::update_position;\n";
 	output_code += "use crate::network::data_types::*;\n\n";
 
 	//generate the to_packets for each individual movement
@@ -320,14 +320,14 @@ fn generate_packet_processor(version: &String) {
 	let mut output_code = String::new();
 
 	//import the types we need
-	output_code += "use crate::block::Block;\n";
-	output_code += "use crate::world::WorldUpdate;\n";
+	output_code += "use crate::world::block::Block;\n";
+	output_code += "use crate::world::world::WorldUpdate;\n";
 	output_code += "use crate::network::packets::Packets;\n";
-	output_code += "use crate::block::Coordinates;\n";
+	output_code += "use crate::world::block::Coordinates;\n";
 	output_code += "use crate::network::data_types::*;\n";
-	output_code += "use crate::entity::EntityPositionAndLook;\n";
+	output_code += "use crate::world::entity::EntityPositionAndLook;\n";
 	output_code += "use std::io::Read;\n";
-	output_code += "use crate::world::Region;\n";
+	output_code += "use crate::world::world::Region;\n";
 	output_code += "use flate2::read::ZlibDecoder;\n\n";
 
 	//function opening

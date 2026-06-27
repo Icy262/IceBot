@@ -1,6 +1,6 @@
 use crate::network::packets::*;
 use crate::bot::PLAYER;
-use crate::physics::update_position;
+use crate::world::physics::update_position;
 use crate::network::data_types::*;
 
 use crate::behaviour::movements::Jump;

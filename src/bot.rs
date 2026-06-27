@@ -9,12 +9,12 @@ use std::{cell::RefCell, collections::LinkedList};
 
 use crate::behaviour::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
 use crate::behaviour::behaviour::Behaviour;
-use crate::block::{self, Block, Coordinates};
+use crate::world::block::{self, Block, Coordinates};
 use crate::network::data_types::{MCBool, MCDouble, MCFloat};
 use crate::network::data_types::{MCMetadata, MCUByte};
 use crate::behaviour::movements::{Jump, Movements, NoInput, Walk, do_movement};
 use crate::network::packets::{KeepAlive, Packets, PlayerPositionandLook};
-use crate::world::{World, WorldUpdate};
+use crate::world::world::{World, WorldUpdate};
 use crate::behaviour;
 use crate::network::network_connection;
 use crate::network::packets::write_packet;
