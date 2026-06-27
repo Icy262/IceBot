@@ -36,6 +36,9 @@ mod tool;
 mod registry {
 	pub(crate) mod block_type;
 }
+mod scheduler {
+	pub(crate) mod scheduler;
+}
 
 use crate::world::block::Block;
 use crate::world::block::Coordinates;
