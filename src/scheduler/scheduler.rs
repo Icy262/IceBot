@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use crate::task::Tasks;
 
 pub(crate) struct Schedule {
+	//TODO: add priority system
 	tasks: Vec<Tasks>,
 }
 
