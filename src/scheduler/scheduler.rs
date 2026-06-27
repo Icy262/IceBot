@@ -21,4 +21,17 @@ impl Schedule {
 			}
 		);
 	}
+
+	fn get_highest_priority_task(self) -> Result<u32, &'static str> {
+		return Ok(
+			self
+				.tasks
+				.iter()
+				.enumerate()
+				.min_by(|(_, &prioritised_task)| (prioritised_task.priority_function)())
+				.ok_or("no tasks available")?
+				.0
+			as u32
+		);
+	}
 }
