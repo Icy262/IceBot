@@ -38,6 +38,7 @@ mod registry {
 }
 mod scheduler {
 	pub(crate) mod scheduler;
+	mod prioritised_task;
 }
 
 use crate::world::block::Block;
