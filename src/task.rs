@@ -1,4 +1,4 @@
-use crate::behaviour::Behaviour;
+use crate::behaviour::behaviour::Behaviour;
 use crate::block::Coordinates;
 
 pub(crate) enum Tasks {

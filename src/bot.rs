@@ -7,12 +7,12 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::{cell::RefCell, collections::LinkedList};
 
-use crate::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
-use crate::behaviour::Behaviour;
+use crate::behaviour::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
+use crate::behaviour::behaviour::Behaviour;
 use crate::block::{self, Block, Coordinates};
 use crate::network::data_types::{MCBool, MCDouble, MCFloat};
 use crate::network::data_types::{MCMetadata, MCUByte};
-use crate::movements::{Jump, Movements, NoInput, Walk, do_movement};
+use crate::behaviour::movements::{Jump, Movements, NoInput, Walk, do_movement};
 use crate::network::packets::{KeepAlive, Packets, PlayerPositionandLook};
 use crate::world::{World, WorldUpdate};
 use crate::behaviour;

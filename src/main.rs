@@ -5,15 +5,17 @@ use std::str::FromStr;
 use std::sync::LazyLock;
 use std::thread;
 
-mod action_translator;
-mod actions;
-mod behaviour;
+mod behaviour {
+	pub(crate) mod behaviour;
+	pub(crate) mod movements;
+	pub(crate) mod movement_translator;
+	pub(crate) mod action_translator;
+	pub(crate) mod actions;
+}
 mod block;
 mod bot;
 mod entity;
 mod item;
-mod movement_translator;
-mod movements;
 mod network {
 	pub(crate) mod data_types;
 	pub(crate) mod network_connection;

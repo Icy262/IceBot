@@ -1,4 +1,4 @@
-use crate::movements::Movements;
+use crate::behaviour::movements::Movements;
 use crate::network::packets::Packets;
 use crate::{
 	block::{self, Block, Coordinates},

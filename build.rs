@@ -105,7 +105,7 @@ fn generate_packets(version: &String) {
 
 	//imports
 	output_code += "use std::io::{Read, Write};\n";
-	output_code += "use crate::data_types::*;\n\n";
+	output_code += "use crate::network::data_types::*;\n\n";
 
 	//insert enum of packets
 	output_code += &packet_enum_generator(packets_spec.clone());
@@ -223,7 +223,7 @@ fn generate_action_translation(version: &String) {
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
-	output_code += "use crate::actions::Actions;\n";
+	output_code += "use crate::behaviour::actions::Actions;\n";
 	output_code += "use crate::network::packets::*;\n";
 	output_code += "use crate::network::data_types::*;\n\n";
 
@@ -239,7 +239,7 @@ fn generate_action_translation(version: &String) {
 			.expect("Should be able to convert packet conversion from yaml to str");
 
 		//import the action we are implementing for
-		output_code += &format!("use crate::actions::{name};\n");
+		output_code += &format!("use crate::behaviour::actions::{name};\n");
 
 		//impl block opening
 		output_code += &format!("impl {} {{\n", name);
@@ -256,7 +256,7 @@ fn generate_action_translation(version: &String) {
 	}
 
 	//write to action translator
-	fs::write("src/action_translator.rs", output_code).unwrap();
+	fs::write("src/behaviour/action_translator.rs", output_code).unwrap();
 }
 
 fn generate_movement_translation(version: &String) {
@@ -271,10 +271,10 @@ fn generate_movement_translation(version: &String) {
 	let mut output_code = String::new();
 
 	//import all packets and data types because we don't know what we might need
-	output_code += "use crate::packets::*;\n";
+	output_code += "use crate::network::packets::*;\n";
 	output_code += "use crate::bot::PLAYER;\n";
 	output_code += "use crate::physics::update_position;\n";
-	output_code += "use crate::data_types::*;\n\n";
+	output_code += "use crate::network::data_types::*;\n\n";
 
 	//generate the to_packets for each individual movement
 	for movement in movements_spec {
@@ -288,7 +288,7 @@ fn generate_movement_translation(version: &String) {
 			.expect("Should be able to convert packet conversion from yaml to str");
 
 		//import the movement we are implementing for
-		output_code += &format!("use crate::movements::{name};\n");
+		output_code += &format!("use crate::behaviour::movements::{name};\n");
 
 		//impl block opening
 		output_code += &format!("impl {} {{\n", name);
@@ -305,7 +305,7 @@ fn generate_movement_translation(version: &String) {
 	}
 
 	//write to movement translator
-	fs::write("src/movement_translator.rs", output_code).unwrap();
+	fs::write("src/behaviour/movement_translator.rs", output_code).unwrap();
 }
 
 fn generate_packet_processor(version: &String) {
@@ -322,9 +322,9 @@ fn generate_packet_processor(version: &String) {
 	//import the types we need
 	output_code += "use crate::block::Block;\n";
 	output_code += "use crate::world::WorldUpdate;\n";
-	output_code += "use crate::packets::Packets;\n";
+	output_code += "use crate::network::packets::Packets;\n";
 	output_code += "use crate::block::Coordinates;\n";
-	output_code += "use crate::data_types::*;\n";
+	output_code += "use crate::network::data_types::*;\n";
 	output_code += "use crate::entity::EntityPositionAndLook;\n";
 	output_code += "use std::io::Read;\n";
 	output_code += "use crate::world::Region;\n";

@@ -1,4 +1,4 @@
-use crate::{actions::Actions, movements::Movements};
+use crate::behaviour::{actions::Actions, movements::Movements};
 
 //Represents the movement and action of a bot in a single tick
 pub(crate) struct Behaviour {

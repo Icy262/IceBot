@@ -1,7 +1,7 @@
 use std::net::TcpStream;
 
 use crate::block::{Block, Coordinates, Direction};
-use crate::movement_translator;
+use crate::behaviour::movement_translator;
 use crate::network::packets::{Packets, write_packet};
 
 pub(crate) enum Movements {
