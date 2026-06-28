@@ -20,6 +20,11 @@ impl Tasks {
 	}
 
 	pub(crate) fn complete(self) -> bool {
-
+		return match self {
+			Tasks::GoTo(task) => task.complete(),
+			Tasks::Gather(task) => task.complete(),
+			Tasks::FindItem(task) => task.complete(),
+			Tasks::ClearRegion(task) => task.complete(),
+		}
 	}
 }
