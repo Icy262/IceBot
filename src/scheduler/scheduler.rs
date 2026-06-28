@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{scheduler::prioritised_task::PrioritisedTask, task::Tasks};
+use crate::{behaviour::behaviour::Behaviour, scheduler::prioritised_task::PrioritisedTask, task::Tasks};
 
 pub(crate) struct Schedule {
 	//index of the highest priority task. None means there is no active task, which would happen if we run out of tasks.
@@ -25,8 +25,8 @@ impl Schedule {
 		);
 	}
 
-	pub(crate) fn get_next_behaviour(&mut self) {
-		let highest_priority_task_index = self.get_highest_priority_task().unwrap_or(return);
+	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+		let highest_priority_task_index = self.get_highest_priority_task().unwrap_or(return None);
 		let highest_priority_task = self
 			.tasks
 			.get(highest_priority_task_index)
@@ -52,7 +52,7 @@ impl Schedule {
 			self.current_task = None;
 			return self.get_next_behaviour();
 		} else {
-			return highest_priority_task.get_next_behaviour();
+			return Some(highest_priority_task.task.get_next_behaviour());
 		}
 	}
 
