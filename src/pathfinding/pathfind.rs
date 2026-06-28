@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use flate2::Status::Ok;
-
 use crate::BLOCK_REGISTRY;
 use crate::world::block::Coordinates;
 use crate::registry::block_type::Collision;
@@ -74,7 +72,7 @@ impl Path {
 			self.U.insert_or_update(u, &key);
 		}
 
-		return Result::Ok(());
+		return Ok(());
 	}
 
 	//outside behaviour should be the same as the function in the paper. internal mechanics differ slightly
@@ -116,7 +114,7 @@ impl Path {
 			}
 		}
 
-		return Result::Ok(());
+		return Ok(());
 	}
 
 	//called Main() in paper, but compute_path makes more sense
@@ -285,13 +283,13 @@ impl Path {
 	//returns the value of g(s_prime) + c(s_prime, s) where s_prime is the pred(s) that produces the smallest value
 	fn bellman(&self, s: &Coordinates) -> Result<u32, &'static str> {
 		if *s == self.s_start {
-			return Result::Ok(0);
+			return Ok(0);
 		} else {
 			let mut result = u32::MAX;
 			for s_prime in Path::pred(s) {
 				result = Ord::min(result, self.nodes.get(&s_prime).ok_or("could not find node")?.g + Path::c(&s_prime, s));
 			}
-			return Result::Ok(result);
+			return Ok(result);
 		}
 	}
 
