@@ -49,7 +49,7 @@ impl Path {
 	}
 
 	//TODO: implement remainder, per paper
-	fn initialize(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
+	pub(crate) fn initialize(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
 		return Path {
 			s_start: (*s_start).clone(),
 			s_goal: (*s_goal).clone(),
