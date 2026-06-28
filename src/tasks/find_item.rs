@@ -2,3 +2,8 @@
 pub(crate) struct FindItem {
 	pub(crate) item: String,
 }
+
+impl FindItem {
+	pub(crate) fn get_next_behaviour(&self) -> Behaviour {
+	}
+}
