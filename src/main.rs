@@ -33,7 +33,11 @@ mod pathfinding {
 mod player;
 mod tasks {
 	pub(crate) mod tasks;
-};
+	pub(crate) mod clear_region;
+	pub(crate) mod find_item;
+	pub(crate) mod gather;
+	pub(crate) mod go_to;
+}
 mod tool;
 mod registry {
 	pub(crate) mod block_type;
