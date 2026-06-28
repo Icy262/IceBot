@@ -10,6 +10,12 @@ pub(crate) enum Tasks {
 
 impl Tasks {
 	pub(super) fn activate(self) {
+		return match task {
+			Tasks::GoTo(task) => task.activate(),
+			Tasks::Gather(task) => task.activate(),
+			Tasks::FindItem(task) => task.activate(),
+			Tasks::ClearRegion(task) => task.activate(),
+		}
 	}
 
 	pub(super) fn deactivate(self) {
