@@ -14,5 +14,6 @@ impl GoTo {
 	}
 
 	pub(crate) fn complete(self) -> bool {
+		return false;
 	}
 }
