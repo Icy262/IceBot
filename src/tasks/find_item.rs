@@ -8,4 +8,7 @@ pub(crate) struct FindItem {
 impl FindItem {
 	pub(crate) fn get_next_behaviour(&self) -> Behaviour {
 	}
+	
+	pub(crate) fn complete(self) -> bool {
+	}
 }
