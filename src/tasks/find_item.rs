@@ -13,5 +13,6 @@ impl FindItem {
 	}
 	
 	pub(crate) fn complete(self) -> bool {
+		return false;
 	}
 }
