@@ -31,7 +31,9 @@ mod pathfinding {
 	mod priority_queue;
 }
 mod player;
-mod task;
+mod tasks {
+	pub(crate) mod tasks;
+};
 mod tool;
 mod registry {
 	pub(crate) mod block_type;
