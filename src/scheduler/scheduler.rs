@@ -1,6 +1,8 @@
 use std::collections::VecDeque;
 
-use crate::{behaviour::behaviour::Behaviour, scheduler::prioritised_task::PrioritisedTask, task::Tasks};
+use crate::behaviour::behaviour::Behaviour;
+use crate::scheduler::prioritised_task::PrioritisedTask;
+use crate::tasks::tasks::Tasks;
 
 pub(crate) struct Schedule {
 	//index of the highest priority task. None means there is no active task, which would happen if we run out of tasks.

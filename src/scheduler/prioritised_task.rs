@@ -1,4 +1,4 @@
-use crate::task::Tasks;
+use crate::tasks::tasks::Tasks;
 
 pub(super) struct PrioritisedTask {
 	pub(super) task: Tasks,
