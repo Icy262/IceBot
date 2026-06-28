@@ -46,6 +46,9 @@ mod scheduler {
 	pub(crate) mod scheduler;
 	mod prioritised_task;
 }
+mod hierarchical_task_network {
+	pub(crate) mod hierarchical_task_network;
+}
 
 use crate::world::block::Block;
 use crate::world::block::Coordinates;
