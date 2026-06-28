@@ -32,21 +32,6 @@ impl Schedule {
 			.get(highest_priority_task_index)
 			.expect("Should be able to find highest priority task to activate it");
 
-		if let Some(current_task_index) = self.current_task {
-			if current_task_index != highest_priority_task_index {
-				self
-					.tasks
-					.get(current_task_index)
-					.expect("Should be able to find old task to deactivate it")
-					.deactivate();
-
-				highest_priority_task.activate();
-			}
-		} else {  
-
-			highest_priority_task.activate();
-		}
-
 		if highest_priority_task.complete() {
 			self.tasks.remove(highest_priority_task_index);
 			self.current_task = None;
