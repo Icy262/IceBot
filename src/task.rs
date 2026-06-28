@@ -18,6 +18,12 @@ impl Tasks {
 	}
 
 	pub(crate) fn get_next_behaviour(self) -> Behaviour {
+		return match task {
+			Tasks::GoTo(task) => task.get_next_behaviour(),
+			Tasks::Gather(task) => task.get_next_behaviour(),
+			Tasks::FindItem(task) => task.get_next_behaviour(),
+			Tasks::ClearRegion(task) => task.get_next_behaviour(),
+		}
 	}
 }
 
