@@ -1,5 +1,5 @@
-use std::io::{Read, Write};
 use crate::network::data_types::*;
+use std::io::{Read, Write};
 
 pub(crate) enum Packets {
 	KeepAlive(KeepAlive),
@@ -78,9 +78,13 @@ pub(crate) fn read_packet<R: Read>(stream: &mut R) -> Option<Packets> {
 		Player::ID => Packets::Player(Player::read(stream)),
 		PlayerPosition::ID => Packets::PlayerPosition(PlayerPosition::read(stream)),
 		PlayerLook::ID => Packets::PlayerLook(PlayerLook::read(stream)),
-		PlayerPositionandLook::ID => Packets::PlayerPositionandLook(PlayerPositionandLook::read(stream)),
+		PlayerPositionandLook::ID => {
+			Packets::PlayerPositionandLook(PlayerPositionandLook::read(stream))
+		}
 		PlayerDigging::ID => Packets::PlayerDigging(PlayerDigging::read(stream)),
-		PlayerBlockPlacement::ID => Packets::PlayerBlockPlacement(PlayerBlockPlacement::read(stream)),
+		PlayerBlockPlacement::ID => {
+			Packets::PlayerBlockPlacement(PlayerBlockPlacement::read(stream))
+		}
 		HoldingChange::ID => Packets::HoldingChange(HoldingChange::read(stream)),
 		UseBed::ID => Packets::UseBed(UseBed::read(stream)),
 		Animation::ID => Packets::Animation(Animation::read(stream)),
@@ -97,7 +101,9 @@ pub(crate) fn read_packet<R: Read>(stream: &mut R) -> Option<Packets> {
 		Entity::ID => Packets::Entity(Entity::read(stream)),
 		EntityRelativeMove::ID => Packets::EntityRelativeMove(EntityRelativeMove::read(stream)),
 		EntityLook::ID => Packets::EntityLook(EntityLook::read(stream)),
-		EntityLookandRelativeMove::ID => Packets::EntityLookandRelativeMove(EntityLookandRelativeMove::read(stream)),
+		EntityLookandRelativeMove::ID => {
+			Packets::EntityLookandRelativeMove(EntityLookandRelativeMove::read(stream))
+		}
 		EntityTeleport::ID => Packets::EntityTeleport(EntityTeleport::read(stream)),
 		EntityStatus::ID => Packets::EntityStatus(EntityStatus::read(stream)),
 		AttachEntity::ID => Packets::AttachEntity(AttachEntity::read(stream)),
@@ -162,7 +168,9 @@ pub(crate) fn write_packet<W: Write>(stream: &mut W, packet: Packets) {
 		Packets::Entity(packet) => Entity::write(stream, packet),
 		Packets::EntityRelativeMove(packet) => EntityRelativeMove::write(stream, packet),
 		Packets::EntityLook(packet) => EntityLook::write(stream, packet),
-		Packets::EntityLookandRelativeMove(packet) => EntityLookandRelativeMove::write(stream, packet),
+		Packets::EntityLookandRelativeMove(packet) => {
+			EntityLookandRelativeMove::write(stream, packet)
+		}
 		Packets::EntityTeleport(packet) => EntityTeleport::write(stream, packet),
 		Packets::EntityStatus(packet) => EntityStatus::write(stream, packet),
 		Packets::AttachEntity(packet) => AttachEntity::write(stream, packet),
@@ -188,21 +196,18 @@ pub(crate) fn write_packet<W: Write>(stream: &mut W, packet: Packets) {
 		Packets::IncrementStatistic(packet) => IncrementStatistic::write(stream, packet),
 		Packets::DisconnectorKick(packet) => DisconnectorKick::write(stream, packet),
 	};
-
 }
 
-pub(crate) struct KeepAlive {
-}
+pub(crate) struct KeepAlive {}
 
 impl KeepAlive {
 	const ID: u8 = 0;
 	pub(crate) fn read<R: Read>(stream: &mut R) -> Self {
-		Self {
-		}
+		Self {}
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 	}
 }
 
@@ -225,7 +230,7 @@ impl LoginRequest {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.protocol_version);
 		MCString16::write(stream, data.username);
 		MCLong::write(stream, data.map_seed);
@@ -246,7 +251,7 @@ impl Handshake {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCString16::write(stream, data.username);
 	}
 }
@@ -264,7 +269,7 @@ impl ChatMessage {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCString16::write(stream, data.message);
 	}
 }
@@ -282,7 +287,7 @@ impl TimeUpdate {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCLong::write(stream, data.time);
 	}
 }
@@ -306,7 +311,7 @@ impl EntityEquipment {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCShort::write(stream, data.slot);
 		MCShort::write(stream, data.item_id);
@@ -331,7 +336,7 @@ impl SpawnPosition {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCInt::write(stream, data.y);
 		MCInt::write(stream, data.z);
@@ -355,7 +360,7 @@ impl UseEntity {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.user);
 		MCInt::write(stream, data.target);
 		MCBool::write(stream, data.left_click);
@@ -375,7 +380,7 @@ impl UpdateHealth {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCShort::write(stream, data.health);
 	}
 }
@@ -393,7 +398,7 @@ impl Respawn {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.world);
 	}
 }
@@ -411,7 +416,7 @@ impl Player {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCBool::write(stream, data.on_ground);
 	}
 }
@@ -437,7 +442,7 @@ impl PlayerPosition {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCDouble::write(stream, data.x);
 		MCDouble::write(stream, data.y);
 		MCDouble::write(stream, data.stance);
@@ -463,7 +468,7 @@ impl PlayerLook {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCFloat::write(stream, data.yaw);
 		MCFloat::write(stream, data.pitch);
 		MCBool::write(stream, data.on_ground);
@@ -495,7 +500,7 @@ impl PlayerPositionandLook {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCDouble::write(stream, data.x);
 		MCDouble::write(stream, data.y);
 		MCDouble::write(stream, data.stance);
@@ -527,7 +532,7 @@ impl PlayerDigging {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.status);
 		MCInt::write(stream, data.x);
 		MCByte::write(stream, data.y);
@@ -561,7 +566,7 @@ impl PlayerBlockPlacement {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCByte::write(stream, data.y);
 		MCInt::write(stream, data.z);
@@ -585,7 +590,7 @@ impl HoldingChange {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCShort::write(stream, data.slot_id);
 	}
 }
@@ -611,7 +616,7 @@ impl UseBed {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCByte::write(stream, data.in_bed);
 		MCInt::write(stream, data.x);
@@ -635,7 +640,7 @@ impl Animation {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.animate);
 	}
@@ -656,7 +661,7 @@ impl EntityAction {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.action);
 	}
@@ -689,7 +694,7 @@ impl NamedEntitySpawn {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCString16::write(stream, data.player_name);
 		MCInt::write(stream, data.x);
@@ -732,7 +737,7 @@ impl PickupSpawn {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCShort::write(stream, data.item);
 		MCByte::write(stream, data.count);
@@ -761,7 +766,7 @@ impl CollectItem {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.collected_eid_1);
 		MCInt::write(stream, data.collected_eid_2);
 	}
@@ -796,7 +801,7 @@ impl AddObjectorVehicle {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.entity_type);
 		MCInt::write(stream, data.x);
@@ -836,7 +841,7 @@ impl MobSpawn {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.entity_type);
 		MCInt::write(stream, data.x);
@@ -871,7 +876,7 @@ impl Painting {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCString16::write(stream, data.titile);
 		MCInt::write(stream, data.x);
@@ -904,7 +909,7 @@ impl StanceUpdate {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCFloat::write(stream, data.unknown_1);
 		MCFloat::write(stream, data.unknown_2);
 		MCFloat::write(stream, data.unknown_3);
@@ -933,7 +938,7 @@ impl EntityVelocity {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCShort::write(stream, data.velocity_x);
 		MCShort::write(stream, data.velocity_y);
@@ -954,7 +959,7 @@ impl DestroyEntity {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 	}
 }
@@ -972,7 +977,7 @@ impl Entity {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 	}
 }
@@ -996,7 +1001,7 @@ impl EntityRelativeMove {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.dx);
 		MCByte::write(stream, data.dy);
@@ -1021,7 +1026,7 @@ impl EntityLook {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.yaw);
 		MCByte::write(stream, data.pitch);
@@ -1051,7 +1056,7 @@ impl EntityLookandRelativeMove {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCByte::write(stream, data.dx);
 		MCByte::write(stream, data.dy);
@@ -1084,7 +1089,7 @@ impl EntityTeleport {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.eid);
 		MCInt::write(stream, data.x);
 		MCInt::write(stream, data.y);
@@ -1109,7 +1114,7 @@ impl EntityStatus {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCByte::write(stream, data.entity_status);
 	}
@@ -1130,7 +1135,7 @@ impl AttachEntity {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCInt::write(stream, data.vehicle_id);
 	}
@@ -1151,7 +1156,7 @@ impl Entitymetadata {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCMetadata::write(stream, data.entity_metadata);
 	}
@@ -1174,7 +1179,7 @@ impl PreChunk {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCInt::write(stream, data.z);
 		MCBool::write(stream, data.mode);
@@ -1206,7 +1211,7 @@ impl MapChunk {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCShort::write(stream, data.y);
 		MCInt::write(stream, data.z);
@@ -1234,7 +1239,7 @@ impl MultiBlockChange {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.chunk_x);
 		MCInt::write(stream, data.chunk_z);
 		MCBlockUpdateArray::write(stream, data.block_update_array);
@@ -1262,7 +1267,7 @@ impl BlockChange {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCByte::write(stream, data.y);
 		MCInt::write(stream, data.z);
@@ -1292,7 +1297,7 @@ impl BlockAction {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCShort::write(stream, data.y);
 		MCInt::write(stream, data.z);
@@ -1322,7 +1327,7 @@ impl Explosion {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCDouble::write(stream, data.x);
 		MCDouble::write(stream, data.y);
 		MCDouble::write(stream, data.z);
@@ -1352,7 +1357,7 @@ impl SoundEffect {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.effect_id);
 		MCInt::write(stream, data.x);
 		MCByte::write(stream, data.y);
@@ -1374,7 +1379,7 @@ impl NeworInvalidState {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.reason);
 	}
 }
@@ -1400,7 +1405,7 @@ impl Thunderbolt {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.entity_id);
 		MCBool::write(stream, data.unknown);
 		MCInt::write(stream, data.x);
@@ -1428,7 +1433,7 @@ impl OpenWindow {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.window_id);
 		MCByte::write(stream, data.inventory_type);
 		MCString8::write(stream, data.window_title);
@@ -1436,18 +1441,16 @@ impl OpenWindow {
 	}
 }
 
-pub(crate) struct CloseWindow {
-}
+pub(crate) struct CloseWindow {}
 
 impl CloseWindow {
 	const ID: u8 = 101;
 	pub(crate) fn read<R: Read>(stream: &mut R) -> Self {
-		Self {
-		}
+		Self {}
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 	}
 }
 
@@ -1474,7 +1477,7 @@ impl WindowClick {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.window_id);
 		MCShort::write(stream, data.slot);
 		MCBool::write(stream, data.right_click);
@@ -1501,7 +1504,7 @@ impl SetSlot {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.window_id);
 		MCShort::write(stream, data.slot);
 		MCItem::write(stream, data.item);
@@ -1523,7 +1526,7 @@ impl WindowItems {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.window_id);
 		MCInventoryPayload::write(stream, data.payload);
 	}
@@ -1546,7 +1549,7 @@ impl UpdateProgressBar {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.window_id);
 		MCShort::write(stream, data.progress_bar);
 		MCShort::write(stream, data.value);
@@ -1570,7 +1573,7 @@ impl Transaction {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCByte::write(stream, data.window_id);
 		MCShort::write(stream, data.action_number);
 		MCBool::write(stream, data.accepted);
@@ -1602,7 +1605,7 @@ impl UpdateSign {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.x);
 		MCShort::write(stream, data.y);
 		MCInt::write(stream, data.z);
@@ -1632,7 +1635,7 @@ impl ItemData {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCShort::write(stream, data.item_type);
 		MCShort::write(stream, data.item_id);
 		MCByte::write(stream, data.text_length);
@@ -1655,7 +1658,7 @@ impl IncrementStatistic {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCInt::write(stream, data.statistic_id);
 		MCByte::write(stream, data.amount);
 	}
@@ -1674,8 +1677,7 @@ impl DisconnectorKick {
 	}
 
 	pub(crate) fn write<W: Write>(stream: &mut W, data: Self) {
-		MCUByte::write(stream, MCUByte { value: Self::ID});
+		MCUByte::write(stream, MCUByte { value: Self::ID });
 		MCString16::write(stream, data.reason);
 	}
 }
-

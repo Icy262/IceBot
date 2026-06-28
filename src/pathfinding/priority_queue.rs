@@ -1,6 +1,6 @@
-use std::collections::{BinaryHeap, HashMap};
-use std::cmp::Reverse;
 use std::cmp::Ordering;
+use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashMap};
 
 use crate::world::block::Coordinates;
 
@@ -56,11 +56,11 @@ impl PriorityQueue {
 						self.key_map.remove(&state);
 						return Some((state, key));
 					}
-				},
+				}
 				None => continue,
 			}
 		}
-		
+
 		return None;
 	}
 
@@ -72,11 +72,11 @@ impl PriorityQueue {
 					if key_map_key == key {
 						return Some((state, key));
 					}
-				},
+				}
 				None => continue,
 			}
 		}
-		
+
 		return None;
 	}
 

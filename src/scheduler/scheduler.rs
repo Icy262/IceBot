@@ -18,13 +18,15 @@ impl Schedule {
 		}
 	}
 
-	pub(crate) fn push_task(&mut self, new_task: Tasks, priority_function: Box<dyn FnMut() -> usize>) {
-		self.tasks.push(
-			PrioritisedTask {
-				task: new_task,
-				priority_function: priority_function,
-			}
-		);
+	pub(crate) fn push_task(
+		&mut self,
+		new_task: Tasks,
+		priority_function: Box<dyn FnMut() -> usize>,
+	) {
+		self.tasks.push(PrioritisedTask {
+			task: new_task,
+			priority_function: priority_function,
+		});
 	}
 
 	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
@@ -56,11 +58,11 @@ impl Schedule {
 						highest_priority_value = Some(task_priority);
 						highest_priority_index = Some(index);
 					}
-				},
+				}
 				None => {
 					highest_priority_value = Some((task.priority_function)());
 					highest_priority_index = Some(index);
-				},
+				}
 			}
 		}
 

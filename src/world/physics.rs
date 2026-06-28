@@ -1,9 +1,9 @@
 use crate::behaviour::movements::Movements;
 use crate::network::packets::Packets;
 use crate::{
-	world::block::{self, Block, Coordinates},
 	bot::PLAYER,
 	player::Player,
+	world::block::{self, Block, Coordinates},
 	world::world::{WORLD_MODEL, World},
 };
 

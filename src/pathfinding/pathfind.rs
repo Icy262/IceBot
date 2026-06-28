@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::BLOCK_REGISTRY;
-use crate::world::block::Coordinates;
+use crate::pathfinding::priority_queue::{Key, PriorityQueue};
 use crate::registry::block_type::Collision;
+use crate::world::block::Coordinates;
 use crate::world::world::World;
-use crate::pathfinding::priority_queue::{PriorityQueue, Key};
 
 //Uses D* lite with post processing to smooth paths
 //References:
@@ -42,12 +42,10 @@ impl Path {
 	fn calculate_key(&mut self, s: &Coordinates) -> Option<Key> {
 		let node = self.nodes.get(s)?;
 
-		return Some(
-			Key {
-				k_1: Ord::min(node.g, node.rhs + self.h(&self.s_start, s)) + self.k_m,
-				k_2: Ord::min(node.g, node.rhs),
-			}
-		);
+		return Some(Key {
+			k_1: Ord::min(node.g, node.rhs + self.h(&self.s_start, s)) + self.k_m,
+			k_2: Ord::min(node.g, node.rhs),
+		});
 	}
 
 	//TODO: implement remainder, per paper
@@ -58,7 +56,7 @@ impl Path {
 			nodes: HashMap::new(),
 			U: PriorityQueue::new(),
 			k_m: 0,
-		}
+		};
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) -> Result<(), &'static str> {
@@ -77,12 +75,20 @@ impl Path {
 
 	//outside behaviour should be the same as the function in the paper. internal mechanics differ slightly
 	fn compute_shortest_path(&mut self) -> Result<(), &'static str> {
-		let s_start_node = (*self.nodes.get(&self.s_start).ok_or("start node not defined")?).clone();
-		let s_start_key = self.calculate_key(&(self.s_start.clone())).ok_or("start node not defined")?;
-		while self.U.peek().ok_or("no solution exists")?.1 < s_start_key || s_start_node.rhs != s_start_node.g {
+		let s_start_node = (*self
+			.nodes
+			.get(&self.s_start)
+			.ok_or("start node not defined")?)
+		.clone();
+		let s_start_key = self
+			.calculate_key(&(self.s_start.clone()))
+			.ok_or("start node not defined")?;
+		while self.U.peek().ok_or("no solution exists")?.1 < s_start_key
+			|| s_start_node.rhs != s_start_node.g
+		{
 			let (u, k_old) = self.U.pop().ok_or("no solution exists")?;
 			let k_new = self.calculate_key(&u).ok_or("could not calculate key")?;
-			
+
 			let node_u = self.nodes.get_mut(&u).ok_or("could not find node")?;
 			if k_old < k_new {
 				self.U.insert_or_update(&u, &k_new);
@@ -140,7 +146,7 @@ impl Path {
 	//}
 
 	//cost of moving from s to s_prime where s_prime is succ(s)
-	fn c(s: &Coordinates, s_prime: &Coordinates) -> u32{
+	fn c(s: &Coordinates, s_prime: &Coordinates) -> u32 {
 		//get the blocks at eye, foot, and below the player to see if breaking or placing is necessary
 		let position_head = Coordinates {
 			y: s_prime.y + 1,
@@ -222,30 +228,12 @@ impl Path {
 	//returns the predecessors of s on the graph
 	fn pred(s: &Coordinates) -> Vec<Coordinates> {
 		return vec![
-			Coordinates {
-				x: s.x + 1,
-				..*s
-			},
-			Coordinates {
-				x: s.x - 1,
-				..*s
-			},
-			Coordinates {
-				y: s.y + 1,
-				..*s
-			},
-			Coordinates {
-				y: s.y - 1,
-				..*s
-			},
-			Coordinates {
-				z: s.z + 1,
-				..*s
-			},
-			Coordinates {
-				z: s.z + 1,
-				..*s
-			},
+			Coordinates { x: s.x + 1, ..*s },
+			Coordinates { x: s.x - 1, ..*s },
+			Coordinates { y: s.y + 1, ..*s },
+			Coordinates { y: s.y - 1, ..*s },
+			Coordinates { z: s.z + 1, ..*s },
+			Coordinates { z: s.z + 1, ..*s },
 		];
 	}
 
@@ -253,30 +241,12 @@ impl Path {
 	//returns the successors of s on the graph
 	fn succ(s: &Coordinates) -> Vec<Coordinates> {
 		return vec![
-			Coordinates {
-				x: s.x + 1,
-				..*s
-			},
-			Coordinates {
-				x: s.x - 1,
-				..*s
-			},
-			Coordinates {
-				y: s.y + 1,
-				..*s
-			},
-			Coordinates {
-				y: s.y - 1,
-				..*s
-			},
-			Coordinates {
-				z: s.z + 1,
-				..*s
-			},
-			Coordinates {
-				z: s.z + 1,
-				..*s
-			},
+			Coordinates { x: s.x + 1, ..*s },
+			Coordinates { x: s.x - 1, ..*s },
+			Coordinates { y: s.y + 1, ..*s },
+			Coordinates { y: s.y - 1, ..*s },
+			Coordinates { z: s.z + 1, ..*s },
+			Coordinates { z: s.z + 1, ..*s },
 		];
 	}
 
@@ -287,7 +257,10 @@ impl Path {
 		} else {
 			let mut result = u32::MAX;
 			for s_prime in Path::pred(s) {
-				result = Ord::min(result, self.nodes.get(&s_prime).ok_or("could not find node")?.g + Path::c(&s_prime, s));
+				result = Ord::min(
+					result,
+					self.nodes.get(&s_prime).ok_or("could not find node")?.g + Path::c(&s_prime, s),
+				);
 			}
 			return Ok(result);
 		}

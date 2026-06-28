@@ -1,6 +1,6 @@
 use crate::behaviour::behaviour::Behaviour;
-use crate::world::block::Coordinates;
 use crate::tasks::{clear_region::ClearRegion, find_item::FindItem, gather::Gather, go_to::GoTo};
+use crate::world::block::Coordinates;
 
 pub(crate) enum Tasks {
 	GoTo(GoTo),
@@ -16,7 +16,7 @@ impl Tasks {
 			Tasks::Gather(task) => task.get_next_behaviour(),
 			Tasks::FindItem(task) => task.get_next_behaviour(),
 			Tasks::ClearRegion(task) => task.get_next_behaviour(),
-		}
+		};
 	}
 
 	pub(crate) fn complete(self) -> bool {
@@ -25,6 +25,6 @@ impl Tasks {
 			Tasks::Gather(task) => task.complete(),
 			Tasks::FindItem(task) => task.complete(),
 			Tasks::ClearRegion(task) => task.complete(),
-		}
+		};
 	}
 }

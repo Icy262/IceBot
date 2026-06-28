@@ -6,11 +6,11 @@ use std::sync::LazyLock;
 use std::thread;
 
 mod behaviour {
-	pub(crate) mod behaviour;
-	pub(crate) mod movements;
-	pub(crate) mod movement_translator;
 	pub(crate) mod action_translator;
 	pub(crate) mod actions;
+	pub(crate) mod behaviour;
+	pub(crate) mod movement_translator;
+	pub(crate) mod movements;
 }
 mod world {
 	pub(crate) mod block;
@@ -32,28 +32,28 @@ mod pathfinding {
 }
 mod player;
 mod tasks {
-	pub(crate) mod tasks;
 	pub(crate) mod clear_region;
 	pub(crate) mod find_item;
 	pub(crate) mod gather;
 	pub(crate) mod go_to;
+	pub(crate) mod tasks;
 }
 mod tool;
 mod registry {
 	pub(crate) mod block_type;
 }
 mod scheduler {
-	pub(crate) mod scheduler;
 	mod prioritised_task;
+	pub(crate) mod scheduler;
 }
 mod hierarchical_task_network {
 	pub(crate) mod hierarchical_task_network;
 }
 
-use crate::world::block::Block;
-use crate::world::block::Coordinates;
 use crate::block_type::{BlockType, build_block_type_registry};
 use crate::registry::block_type;
+use crate::world::block::Block;
+use crate::world::block::Coordinates;
 use crate::world::world::World;
 
 static BLOCK_REGISTRY: LazyLock<HashMap<String, BlockType>> =

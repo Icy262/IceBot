@@ -1,127 +1,120 @@
-use crate::world::block::Block;
-use crate::world::world::WorldUpdate;
-use crate::network::packets::Packets;
-use crate::world::block::Coordinates;
 use crate::network::data_types::*;
+use crate::network::packets::Packets;
+use crate::world::block::Block;
+use crate::world::block::Coordinates;
 use crate::world::entity::EntityPositionAndLook;
-use std::io::Read;
 use crate::world::world::Region;
+use crate::world::world::WorldUpdate;
 use flate2::read::ZlibDecoder;
+use std::io::Read;
 
 pub(crate) fn process_packet(packet: Packets) -> WorldUpdate {
 	return match packet {
-Packets::MapChunk(packet) => {
-//unwrap the compressed data out of MCUBytes and inflate it using zlib
-let unwraped_compressed = packet.map_chunk.compressed_data.iter().map(|mcbyte| mcbyte.value).collect::<Vec<u8>>();
-let mut decoder = ZlibDecoder::new(unwraped_compressed.as_slice());
-let mut decompressed = Vec::new();
-decoder.read_to_end(&mut decompressed);
+		Packets::MapChunk(packet) => {
+			//unwrap the compressed data out of MCUBytes and inflate it using zlib
+			let unwraped_compressed = packet
+				.map_chunk
+				.compressed_data
+				.iter()
+				.map(|mcbyte| mcbyte.value)
+				.collect::<Vec<u8>>();
+			let mut decoder = ZlibDecoder::new(unwraped_compressed.as_slice());
+			let mut decompressed = Vec::new();
+			decoder.read_to_end(&mut decompressed);
 
-//get the dimensions of the region and the total number of blocks contained in it
-let size_x = packet.size_x.value as usize + 1;
-let size_y = packet.size_y.value as usize + 1;
-let size_z = packet.size_z.value as usize + 1;
-let num_blocks = size_x * size_y * size_z;
+			//get the dimensions of the region and the total number of blocks contained in it
+			let size_x = packet.size_x.value as usize + 1;
+			let size_y = packet.size_y.value as usize + 1;
+			let size_z = packet.size_z.value as usize + 1;
+			let num_blocks = size_x * size_y * size_z;
 
-//format the data into vecs of block types, metadata, light levels, and sky light
-let block_ids: &[u8] = &decompressed[0..num_blocks];
-let block_metadata: &[u8] = &decompressed[num_blocks..(3*num_blocks/2) as usize];
+			//format the data into vecs of block types, metadata, light levels, and sky light
+			let block_ids: &[u8] = &decompressed[0..num_blocks];
+			let block_metadata: &[u8] = &decompressed[num_blocks..(3 * num_blocks / 2) as usize];
 
-//unused
-//TODO: implement block and sky light levels
-let block_light = &decompressed[(3*num_blocks/2) as usize .. (2 * num_blocks) as usize];
-let sky_light = &decompressed[(2 * num_blocks) as usize .. (5*num_blocks/2) as usize];
+			//unused
+			//TODO: implement block and sky light levels
+			let block_light =
+				&decompressed[(3 * num_blocks / 2) as usize..(2 * num_blocks) as usize];
+			let sky_light = &decompressed[(2 * num_blocks) as usize..(5 * num_blocks / 2) as usize];
 
-//generate the palette and local id array
-//TODO: implement metadata
-let mut palette: Vec<String> = Vec::new();
-let mut local_ids = vec![vec![vec![0u8; size_z]; size_y]; size_x];
-for current_x in 0..size_x {
-    for current_y in 0..size_y {
-        for current_z in 0..size_z {
-            //get index of block type in array
-            let index = current_y + (current_z * size_y) + (current_x * size_y * size_z); //see https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Multi_Block_Change_(0x34) for reason on why this formula works
+			//generate the palette and local id array
+			//TODO: implement metadata
+			let mut palette: Vec<String> = Vec::new();
+			let mut local_ids = vec![vec![vec![0u8; size_z]; size_y]; size_x];
+			for current_x in 0..size_x {
+				for current_y in 0..size_y {
+					for current_z in 0..size_z {
+						//get index of block type in array
+						let index =
+							current_y + (current_z * size_y) + (current_x * size_y * size_z); //see https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Multi_Block_Change_(0x34) for reason on why this formula works
 
-            //get block type
-            let block_id = block_ids[index].to_string();
+						//get block type
+						let block_id = block_ids[index].to_string();
 
-            //convert to local block id
-            let mut local_block_id = palette.iter().position(|block| *block == block_id);
+						//convert to local block id
+						let mut local_block_id =
+							palette.iter().position(|block| *block == block_id);
 
-            //if Some, then it was in the palette and we have the local id, if None, we should push the block type to the palette and use the index of the final element as the local id
-            if local_block_id.is_none() {
-                palette.push(block_id);
-                local_block_id = Some(palette.len() - 1)
-            }
+						//if Some, then it was in the palette and we have the local id, if None, we should push the block type to the palette and use the index of the final element as the local id
+						if local_block_id.is_none() {
+							palette.push(block_id);
+							local_block_id = Some(palette.len() - 1)
+						}
 
-            //push the local id to the current position
-            local_ids[current_x][current_y][current_z] = local_block_id.expect("Should be impossible to be None because we check if local_block_id is None to see if it is in the palette") as u8;
-        }
-    }
-}
+						//push the local id to the current position
+						local_ids[current_x][current_y][current_z] = local_block_id.expect("Should be impossible to be None because we check if local_block_id is None to see if it is in the palette") as u8;
+					}
+				}
+			}
 
-WorldUpdate::BlockRegion(
-    Region {
-        start_x: packet.x.value as i32,
-        start_y: packet.y.value as i32,
-        start_z: packet.z.value as i32,
-        size_x: size_x as i32,
-        size_y: size_y as i32,
-        size_z: size_z as i32,
-        palette: palette,
-        local_ids: local_ids,
-    }
-)
+			WorldUpdate::BlockRegion(Region {
+				start_x: packet.x.value as i32,
+				start_y: packet.y.value as i32,
+				start_z: packet.z.value as i32,
+				size_x: size_x as i32,
+				size_y: size_y as i32,
+				size_z: size_z as i32,
+				palette: palette,
+				local_ids: local_ids,
+			})
+		}
+		Packets::MultiBlockChange(packet) => {
+			let mut blocks: Vec<Block> = Vec::new();
+			for i in 0..packet.block_update_array.length.value as usize {
+				let packed_coordinates = packet.block_update_array.coordinate_array[i].value as u16;
+				blocks.push(Block {
+					block_id: packet.block_update_array.type_array[i].value.to_string(),
+					position: Coordinates {
+						//bit shift and mask to isolate the important bits. top 4 bits are x, next 4 are z, final 8 are y
+						x: (packed_coordinates >> 12) as i32,
+						y: (packed_coordinates & 0b11111111) as i32,
+						z: ((packed_coordinates >> 8) & 0b1111) as i32,
+					},
+				})
+			}
 
-},
-Packets::MultiBlockChange(packet) => {
-let mut blocks: Vec<Block> = Vec::new();
-for i in 0..packet.block_update_array.length.value as usize {
-    let packed_coordinates = packet.block_update_array.coordinate_array[i].value as u16;
-    blocks.push(
-        Block {
-            block_id: packet.block_update_array.type_array[i].value.to_string(),
-            position: Coordinates {
-                //bit shift and mask to isolate the important bits. top 4 bits are x, next 4 are z, final 8 are y
-                x: (packed_coordinates >> 12) as i32,
-                y: (packed_coordinates & 0b11111111) as i32,
-                z: ((packed_coordinates >> 8) & 0b1111) as i32,
-            },
-        }
-    )
-}
-
-WorldUpdate::MultiBlock(blocks)
-
-},
-Packets::BlockChange(packet) => {
-WorldUpdate::SingleBlock(
-    Block {
-        block_id: packet.block_id.value.to_string(),
-        position: Coordinates {
-            x: packet.x.value as i32,
-            y: packet.y.value as i32,
-            z: packet.x.value as i32
-        }
-    }
-)
-
-},
-Packets::PlayerPositionandLook(packet) => {
-WorldUpdate::PlayerUpdate(
-    EntityPositionAndLook {
-        x: packet.x.value,
-        //The old protocol is super weird and swaps the order of the stance and y fields on the server to client packet. I don't want to make two different versions of the packet, so we can just use the "stance" value, which is actually the y in this case. See https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Player_Position_&_Look_(0x0D)
-        y: packet.stance.value,
-        z: packet.z.value,
-        yaw: packet.yaw.value as f64,
-        pitch: packet.pitch.value as f64,
-        on_ground: packet.on_ground.value,
-    }
-)
-
-},
+			WorldUpdate::MultiBlock(blocks)
+		}
+		Packets::BlockChange(packet) => WorldUpdate::SingleBlock(Block {
+			block_id: packet.block_id.value.to_string(),
+			position: Coordinates {
+				x: packet.x.value as i32,
+				y: packet.y.value as i32,
+				z: packet.x.value as i32,
+			},
+		}),
+		Packets::PlayerPositionandLook(packet) => {
+			WorldUpdate::PlayerUpdate(EntityPositionAndLook {
+				x: packet.x.value,
+				//The old protocol is super weird and swaps the order of the stance and y fields on the server to client packet. I don't want to make two different versions of the packet, so we can just use the "stance" value, which is actually the y in this case. See https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Player_Position_&_Look_(0x0D)
+				y: packet.stance.value,
+				z: packet.z.value,
+				yaw: packet.yaw.value as f64,
+				pitch: packet.pitch.value as f64,
+				on_ground: packet.on_ground.value,
+			})
+		}
 		_ => WorldUpdate::NoEffect,
 	};
 }
-

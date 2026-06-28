@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use yaml_rust::{Yaml, YamlLoader};
 
-use crate::world::block;
 use crate::item::ItemType;
 use crate::registry::block_type::LightTransparency::Transparent;
 use crate::tool::ToolType;
+use crate::world::block;
 
 pub(crate) struct BlockType {
 	pub(crate) friendly_name: String,

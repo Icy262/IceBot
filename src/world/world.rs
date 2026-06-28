@@ -1,6 +1,6 @@
-use crate::world::block::{Block, Coordinates};
 use crate::bot::PLAYER;
 use crate::network::data_types::{MCMetadata, MCUByte};
+use crate::world::block::{Block, Coordinates};
 use crate::world::entity::{Entity, EntityPositionAndLook};
 use std::collections::HashMap;
 use std::mem::drop;

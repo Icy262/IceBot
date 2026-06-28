@@ -1,8 +1,8 @@
 use std::net::TcpStream;
 
-use crate::world::block::{Block, Coordinates, Direction};
 use crate::behaviour::movement_translator;
 use crate::network::packets::{Packets, write_packet};
+use crate::world::block::{Block, Coordinates, Direction};
 
 pub(crate) enum Movements {
 	Jump(Jump),
