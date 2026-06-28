@@ -9,4 +9,7 @@ pub(crate) struct GoTo {
 impl GoTo {
 	pub(crate) fn get_next_behaviour(&self) -> Behaviour {
 	}
+
+	pub(crate) fn complete(self) -> bool {
+	}
 }
