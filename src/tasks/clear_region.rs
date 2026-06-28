@@ -16,5 +16,6 @@ impl ClearRegion {
 	}
 	
 	pub(crate) fn complete(self) -> bool {
+		return false;
 	}
 }
