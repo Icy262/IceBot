@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::behaviour::behaviour::Behaviour;
-use crate::scheduler::prioritised_task::PrioritisedTask;
+use crate::scheduler::prioritised_task::{self, PrioritisedTask};
 use crate::tasks::tasks::Tasks;
 
 pub(crate) struct Schedule {
@@ -32,9 +32,9 @@ impl Schedule {
 		let highest_priority_task = self
 			.tasks
 			.get(highest_priority_task_index)
-			.expect("Should be able to find highest priority task to activate it");
+			.expect("Should be able to find highest priority task");
 
-		if highest_priority_task.complete() {
+		if highest_priority_task.task.complete() {
 			self.tasks.remove(highest_priority_task_index);
 			self.current_task = None;
 			return self.get_next_behaviour();
@@ -43,15 +43,30 @@ impl Schedule {
 		}
 	}
 
-	fn get_highest_priority_task(self) -> Result<usize, &'static str> {
-		return Ok(
-			self
-				.tasks
-				.iter()
-				.enumerate()
-				.min_by(|(_, &prioritised_task)| (prioritised_task.priority_function)())
-				.ok_or("no tasks available")?
-				.0
-		);
+	fn get_highest_priority_task(&mut self) -> Result<usize, &'static str> {
+		let mut highest_priority_value = None;
+		let mut highest_priority_index = None;
+
+		for (index, task) in self.tasks.iter_mut().enumerate() {
+			match highest_priority_index {
+				Some(highest_priority) => {
+					let task_priority = (task.priority_function)();
+
+					if task_priority > highest_priority {
+						highest_priority_value = Some(task_priority);
+						highest_priority_index = Some(index);
+					}
+				},
+				None => {
+					highest_priority_value = Some((task.priority_function)());
+					highest_priority_index = Some(index);
+				},
+			}
+		}
+
+		return match highest_priority_index {
+			Some(highest_priority_index) => Ok(highest_priority_index),
+			None => Err("Task queue is empty"),
+		};
 	}
 }
