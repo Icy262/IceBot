@@ -14,5 +14,6 @@ impl Gather {
 	}
 	
 	pub(crate) fn complete(self) -> bool {
+		return false;
 	}
 }
