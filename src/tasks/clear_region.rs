@@ -8,6 +8,7 @@ use crate::world::world::{WORLD_MODEL, World};
 pub(crate) struct ClearRegion {
 	pub(crate) start_corner: Coordinates,
 	pub(crate) end_corner: Coordinates,
+	current_highest_y: usize,
 }
 
 impl ClearRegion {
@@ -20,5 +21,10 @@ impl ClearRegion {
 
 	pub(crate) fn complete(self) -> bool {
 		return false;
+	}
+
+	//good enough for now. lawnmower aproach
+	fn find_next_block() {
+		
 	}
 }
