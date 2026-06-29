@@ -11,6 +11,10 @@ pub(crate) struct ClearRegion {
 	current_highest_y: usize,
 }
 
+//we will start from the top layer and work down
+//to prevent using excessive memory, only generate the tasks for a single layer at a time
+//TODO: implement max number of tasks generated at once
+
 impl ClearRegion {
 	pub(crate) fn get_next_behaviour(&self) -> Behaviour {
 		return Behaviour {
