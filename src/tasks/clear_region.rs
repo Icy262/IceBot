@@ -8,6 +8,7 @@ use crate::world::world::{WORLD_MODEL, World};
 pub(crate) struct ClearRegion {
 	pub(crate) start_corner: Coordinates,
 	pub(crate) end_corner: Coordinates,
+	//y-coordinate of the highest block in the region
 	current_highest_y: usize,
 }
 
