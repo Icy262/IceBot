@@ -6,15 +6,12 @@ use crate::scheduler::prioritised_task::{self, PrioritisedHierarchicalTaskNetwor
 use crate::tasks::tasks::Tasks;
 
 pub(crate) struct Schedule {
-	//index of the highest priority task. None means there is no active task, which would happen if we run out of tasks.
-	current_task: Option<usize>,
 	tasks: Vec<PrioritisedHierarchicalTaskNetwork>,
 }
 
 impl Schedule {
 	pub(crate) fn new() -> Self {
 		Self {
-			current_task: None,
 			tasks: Vec::new(),
 		}
 	}
@@ -39,7 +36,6 @@ impl Schedule {
 
 		if highest_priority_task_network.task.complete() {
 			self.tasks.remove(highest_priority_task_network_index);
-			self.current_task = None;
 			return self.get_next_behaviour();
 		} else {
 			return highest_priority_task_network.task.get_next_behaviour();
