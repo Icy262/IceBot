@@ -39,6 +39,17 @@ pub(crate) struct Path {
 
 //fns are implemented as defined in the D* lite paper
 impl Path {
+	//TODO: implement remainder, per paper
+	pub(crate) fn new(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
+		return Self {
+			s_start: *s_start,
+			s_goal: *s_goal,
+			nodes: HashMap::new(),
+			U: PriorityQueue::new(),
+			k_m: 0,
+		};
+	}
+
 	fn calculate_key(&mut self, s: &Coordinates) -> Option<Key> {
 		let node = self.nodes.get(s)?;
 
@@ -46,17 +57,6 @@ impl Path {
 			k_1: Ord::min(node.g, node.rhs + self.h(&self.s_start, s)) + self.k_m,
 			k_2: Ord::min(node.g, node.rhs),
 		});
-	}
-
-	//TODO: implement remainder, per paper
-	pub(crate) fn initialize(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
-		return Path {
-			s_start: (*s_start).clone(),
-			s_goal: (*s_goal).clone(),
-			nodes: HashMap::new(),
-			U: PriorityQueue::new(),
-			k_m: 0,
-		};
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) -> Result<(), &'static str> {
