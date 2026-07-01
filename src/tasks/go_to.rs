@@ -27,7 +27,7 @@ impl GoTo {
 		};
 	}
 
-	pub(crate) fn get_next_behaviour(&mut self) -> Behaviour {
+	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
 				x: player.x.floor() as i32,
@@ -37,10 +37,7 @@ impl GoTo {
 		});
 
 		self.path.update_position(&current_pos);
-		let next_position = self
-			.path
-			.trace_path(&current_pos)
-			.expect("A viable path should exist");
+		let next_position = self.path.trace_path(&current_pos)?;
 
 		let movement = if next_position.y > current_pos.y {
 			Movements::Jump(Jump {})
@@ -48,12 +45,12 @@ impl GoTo {
 			Movements::Walk(Walk {})
 		};
 
-		return Behaviour {
+		return Some(Behaviour {
 			movement: movement,
 			action: Actions::Look(Look {
 				target: next_position,
 			}),
-		};
+		});
 	}
 
 	pub(crate) fn complete(&self) -> bool {
