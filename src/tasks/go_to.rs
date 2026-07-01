@@ -18,7 +18,7 @@ impl GoTo {
 				x: player.x.floor() as i32,
 				y: player.y.floor() as i32,
 				z: player.z.floor() as i32,
-			}
+			};
 		});
 
 		return Self {
@@ -33,11 +33,14 @@ impl GoTo {
 				x: player.x.floor() as i32,
 				y: player.y.floor() as i32,
 				z: player.z.floor() as i32,
-			}
+			};
 		});
 
 		self.path.update_position(&current_pos);
-		let next_position = self.path.trace_path(&current_pos).expect("A viable path should exist");
+		let next_position = self
+			.path
+			.trace_path(&current_pos)
+			.expect("A viable path should exist");
 
 		let movement = if next_position.y > current_pos.y {
 			Movements::Jump(Jump {})
@@ -47,7 +50,9 @@ impl GoTo {
 
 		return Behaviour {
 			movement: movement,
-			action: Actions::Look(Look { target: next_position }),
+			action: Actions::Look(Look {
+				target: next_position,
+			}),
 		};
 	}
 
@@ -57,7 +62,7 @@ impl GoTo {
 				x: player.x.floor() as i32,
 				y: player.y.floor() as i32,
 				z: player.z.floor() as i32,
-			}
+			};
 		});
 
 		return current_pos == self.destination;

@@ -14,9 +14,9 @@ impl MineBlock {
 				x: player.x.floor() as i32,
 				y: player.y.floor() as i32,
 				z: player.z.floor() as i32,
-			}
+			};
 		});
-		
+
 		return Self {
 			position: *position,
 			path: Path::new(&start, position),

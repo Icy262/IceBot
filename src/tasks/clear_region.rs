@@ -29,7 +29,5 @@ impl ClearRegion {
 	}
 
 	//good enough for now. lawnmower aproach
-	fn find_next_block() {
-		
-	}
+	fn find_next_block() {}
 }

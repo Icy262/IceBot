@@ -1,8 +1,8 @@
 use crate::behaviour::actions::{Actions, DoNothing};
 use crate::behaviour::behaviour::Behaviour;
+use crate::behaviour::movements::Movements;
 use crate::behaviour::movements::NoInput;
 use crate::tasks::tasks::Tasks;
-use crate::behaviour::movements::Movements;
 
 pub(crate) struct HierarchicalTaskNetwork {
 	tasks: Vec<Tasks>,

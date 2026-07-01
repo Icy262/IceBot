@@ -36,8 +36,8 @@ mod tasks {
 	pub(crate) mod find_item;
 	pub(crate) mod gather;
 	pub(crate) mod go_to;
-	pub(crate) mod tasks;
 	pub(crate) mod mine_block;
+	pub(crate) mod tasks;
 }
 mod tool;
 mod registry {

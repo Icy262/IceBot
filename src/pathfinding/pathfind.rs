@@ -56,11 +56,7 @@ impl Path {
 
 	//will return the next node in the path from the position passed to the goal. will return None if this node does not exist
 	pub(crate) fn trace_path(&self, position: &Coordinates) -> Option<Coordinates> {
-		return Some (self
-			.nodes
-			.get(position)?
-			.previous
-		);
+		return Some(self.nodes.get(position)?.previous);
 	}
 
 	//TODO: implement updating edge costs
