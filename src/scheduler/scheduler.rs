@@ -31,10 +31,10 @@ impl Schedule {
 	}
 
 	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
-		let highest_priority_task_network_index = self.get_highest_priority_task_network().unwrap_or(return None);
+		let highest_priority_task_network_index = self.get_highest_priority_task_network().ok()?;
 		let highest_priority_task_network = self
 			.tasks
-			.get(highest_priority_task_network_index)
+			.get_mut(highest_priority_task_network_index)
 			.expect("Should be able to find highest priority task");
 
 		if highest_priority_task_network.task.complete() {
@@ -42,7 +42,7 @@ impl Schedule {
 			self.current_task = None;
 			return self.get_next_behaviour();
 		} else {
-			return Some(highest_priority_task_network.task.get_next_behaviour());
+			return highest_priority_task_network.task.get_next_behaviour();
 		}
 	}
 
