@@ -32,4 +32,8 @@ impl HierarchicalTaskNetwork {
 			Tasks::ClearRegion(task) => task.get_next_behaviour(),
 		};
 	}
+
+	pub(crate) fn complete(&self) -> bool {
+		return self.tasks.len() == 0;
+	}
 }
