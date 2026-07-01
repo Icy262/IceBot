@@ -50,6 +50,12 @@ impl Path {
 		};
 	}
 
+	pub(crate) fn update_position(&mut self, new_s_start: &Coordinates) {
+		self.s_start = *new_s_start;
+	}
+
+	//TODO: implement updating edge costs
+
 	fn calculate_key(&mut self, s: &Coordinates) -> Option<Key> {
 		let node = self.nodes.get(s)?;
 
@@ -122,28 +128,6 @@ impl Path {
 
 		return Ok(());
 	}
-
-	//called Main() in paper, but compute_path makes more sense
-	//fn compute_path(&mut self) {
-	//	let mut s_last = self.s_start;
-	//	self.initialize();
-	//	self.compute_shortest_path();
-	//	while(self.s_start != self.s_goal) {
-	//		let s_start = self.bellman(&s_start);
-	//		//move to s_start
-	//		//scan graph for changed edge costs
-	//		//if edge cost changed
-	//			self.k_m = self.k_m + self.h(s_last, self.s_start);
-	//			s_last = self.s_start;
-	//			//for all directed edges (u, v) with changed edge costs
-	//				//we don't know the old cost. this means we always need to call bellman instead of being able to take a shortcut in the case where cost decreases. if this loop is too slow, consider storing old costs. that will trade memory usage for cpu
-	//				if u != self.s_goal {
-	//					self.rhs(u) = self.bellman(&u);
-	//				}
-	//				self.update_vertex(u);
-	//		self.compute_shortest_path();
-	//	}
-	//}
 
 	//cost of moving from s to s_prime where s_prime is succ(s)
 	fn c(s: &Coordinates, s_prime: &Coordinates) -> u32 {
