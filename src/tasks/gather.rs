@@ -9,14 +9,14 @@ pub(crate) struct Gather {
 }
 
 impl Gather {
-	pub(crate) fn get_next_behaviour(&self) -> Behaviour {
+	pub(crate) fn get_next_behaviour(&mut self) -> Behaviour {
 		return Behaviour {
 			movement: Movements::NoInput(NoInput {}),
 			action: Actions::DoNothing(DoNothing {}),
 		};
 	}
 
-	pub(crate) fn complete(self) -> bool {
+	pub(crate) fn complete(&self) -> bool {
 		return false;
 	}
 }
