@@ -51,7 +51,7 @@ impl GoTo {
 		};
 	}
 
-	pub(crate) fn complete(self) -> bool {
+	pub(crate) fn complete(&self) -> bool {
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
 				x: player.x.floor() as i32,
