@@ -7,6 +7,7 @@ use crate::world::block::Coordinates;
 
 //Pathfind to a position and generate the required actions to get there
 pub(crate) struct GoTo {
+	destination: Coordinates,
 	path: Path,
 }
 
@@ -21,6 +22,7 @@ impl GoTo {
 		});
 
 		return Self {
+			destination: *goal,
 			path: Path::new(&start, goal),
 		};
 	}
@@ -50,6 +52,14 @@ impl GoTo {
 	}
 
 	pub(crate) fn complete(self) -> bool {
-		return false;
+		let current_pos = PLAYER.with_borrow(|player| {
+			return Coordinates {
+				x: player.x.floor() as i32,
+				y: player.y.floor() as i32,
+				z: player.z.floor() as i32,
+			}
+		});
+
+		return current_pos == self.destination;
 	}
 }
