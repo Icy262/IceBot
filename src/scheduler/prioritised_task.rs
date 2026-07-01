@@ -1,6 +1,6 @@
-use crate::tasks::tasks::Tasks;
+use crate::hierarchical_task_network::hierarchical_task_network::HierarchicalTaskNetwork;
 
-pub(super) struct PrioritisedTask {
-	pub(super) task: Tasks,
+pub(super) struct PrioritisedHierarchicalTaskNetwork {
+	pub(super) task: HierarchicalTaskNetwork,
 	pub(super) priority_function: Box<dyn FnMut() -> usize>,
 }
