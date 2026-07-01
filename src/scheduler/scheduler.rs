@@ -1,13 +1,14 @@
 use std::collections::VecDeque;
 
 use crate::behaviour::behaviour::Behaviour;
-use crate::scheduler::prioritised_task::{self, PrioritisedTask};
+use crate::hierarchical_task_network::hierarchical_task_network::HierarchicalTaskNetwork;
+use crate::scheduler::prioritised_task::{self, PrioritisedHierarchicalTaskNetwork};
 use crate::tasks::tasks::Tasks;
 
 pub(crate) struct Schedule {
 	//index of the highest priority task. None means there is no active task, which would happen if we run out of tasks.
 	current_task: Option<usize>,
-	tasks: Vec<PrioritisedTask>,
+	tasks: Vec<PrioritisedHierarchicalTaskNetwork>,
 }
 
 impl Schedule {
@@ -18,34 +19,34 @@ impl Schedule {
 		}
 	}
 
-	pub(crate) fn push_task(
+	pub(crate) fn push_task_network(
 		&mut self,
-		new_task: Tasks,
+		new_task: HierarchicalTaskNetwork,
 		priority_function: Box<dyn FnMut() -> usize>,
 	) {
-		self.tasks.push(PrioritisedTask {
+		self.tasks.push(PrioritisedHierarchicalTaskNetwork {
 			task: new_task,
 			priority_function: priority_function,
 		});
 	}
 
 	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
-		let highest_priority_task_index = self.get_highest_priority_task().unwrap_or(return None);
-		let highest_priority_task = self
+		let highest_priority_task_network_index = self.get_highest_priority_task_network().unwrap_or(return None);
+		let highest_priority_task_network = self
 			.tasks
-			.get(highest_priority_task_index)
+			.get(highest_priority_task_network_index)
 			.expect("Should be able to find highest priority task");
 
-		if highest_priority_task.task.complete() {
-			self.tasks.remove(highest_priority_task_index);
+		if highest_priority_task_network.task.complete() {
+			self.tasks.remove(highest_priority_task_network_index);
 			self.current_task = None;
 			return self.get_next_behaviour();
 		} else {
-			return Some(highest_priority_task.task.get_next_behaviour());
+			return Some(highest_priority_task_network.task.get_next_behaviour());
 		}
 	}
 
-	fn get_highest_priority_task(&mut self) -> Result<usize, &'static str> {
+	fn get_highest_priority_task_network(&mut self) -> Result<usize, &'static str> {
 		let mut highest_priority_value = None;
 		let mut highest_priority_index = None;
 
