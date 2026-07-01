@@ -10,7 +10,7 @@ pub(crate) enum Tasks {
 }
 
 impl Tasks {
-	pub(crate) fn get_next_behaviour(self) -> Behaviour {
+	pub(crate) fn get_next_behaviour(&mut self) -> Behaviour {
 		return match self {
 			Tasks::GoTo(task) => task.get_next_behaviour(),
 			Tasks::Gather(task) => task.get_next_behaviour(),
@@ -19,7 +19,7 @@ impl Tasks {
 		};
 	}
 
-	pub(crate) fn complete(self) -> bool {
+	pub(crate) fn complete(&self) -> bool {
 		return match self {
 			Tasks::GoTo(task) => task.complete(),
 			Tasks::Gather(task) => task.complete(),
