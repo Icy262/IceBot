@@ -8,11 +8,8 @@ pub(crate) struct FindItem {
 }
 
 impl FindItem {
-	pub(crate) fn get_next_behaviour(&mut self) -> Behaviour {
-		return Behaviour {
-			movement: Movements::NoInput(NoInput {}),
-			action: Actions::DoNothing(DoNothing {}),
-		};
+	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+		return None;
 	}
 
 	pub(crate) fn complete(&self) -> bool {
