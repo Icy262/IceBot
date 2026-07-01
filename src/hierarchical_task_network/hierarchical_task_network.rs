@@ -9,6 +9,12 @@ pub(crate) struct HierarchicalTaskNetwork {
 }
 
 impl HierarchicalTaskNetwork {
+	pub(crate) fn new(task: Tasks) -> Self {
+		return Self {
+			tasks: vec!(task),
+		}
+	}
+
 	pub(crate) fn get_next_behaviour(&mut self) -> Behaviour {
 		let Some(task) = self.tasks.get_mut(0) else {
 			//we must return an action that does nothing to prevent a complete HTN from crashing 
