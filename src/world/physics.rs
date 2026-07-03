@@ -1,5 +1,7 @@
+use crate::BLOCK_REGISTRY;
 use crate::behaviour::movements::Movements;
 use crate::network::packets::Packets;
+use crate::registry::block_type::Collision;
 use crate::{
 	bot::PLAYER,
 	player::Player,
@@ -28,42 +30,55 @@ pub(crate) fn process_motion(old_player: &Player) -> Player {
 
 	//TODO: implement fall damage
 	//TODO: implement handling for parital hitboxes like slabs
-	//check if player colliding with ground (block it is entering is not air)
+	//check if player colliding with ground (block it is entering is not air)	
+	let block_below = World::get_block(Coordinates {
+		x: new_player.x as i32,
+		y: new_player.y as i32 - 1,
+		z: new_player.z as i32,
+	});
+
 	if new_player.on_ground {
 		//check if should start falling
-		let block_below = World::get_block(Coordinates {
-			x: new_player.x as i32,
-			y: new_player.y as i32 - 1,
-			z: new_player.z as i32,
-		});
 		if block_below.is_some() {
-			//TODO: Implement support for falling through things that are not air but are solid (eg. grass or water)
-			if block_below
-				.expect("Should not be None because we checked it is some")
-				.block_id == "air"
+			//TODO: cleanup
+			match BLOCK_REGISTRY
+				.get(
+					&block_below
+						.expect("Should not be None because we checked it is some")
+						.block_id
+				)
+				.expect("Block with invalid id in world")
+				.collision
 			{
-				new_player.on_ground = false;
-			} else {
-				//if on ground, stop vertical velocity and unclip the old_player from the block below
-				new_player.vy = 0.0;
-				new_player.y = new_player.y.ceil()
+				Collision::Solid => {
+					//if on ground, stop vertical velocity and unclip the old_player from the block below
+					new_player.vy = 0.0;
+					new_player.y = new_player.y.ceil();
+				},
+				_ => new_player.on_ground = false,
 			}
 		}
 	} else {
 		//check if player should stop falling
 		if new_player.y < old_player.y.floor() && old_player.y > old_player.y.floor() {
-			let block_below = World::get_block(Coordinates {
-				x: new_player.x as i32,
-				y: new_player.y as i32 - 1,
-				z: new_player.z as i32,
-			});
 			if block_below.is_some() {
-				//TODO: Implement support for falling through things that are not air but are solid (eg. grass or water)
-				if block_below
-					.expect("Should not be None because we checked it is some")
-					.block_id != "air"
+				//TODO: cleanup
+				match BLOCK_REGISTRY
+					.get(
+						&block_below
+							.expect("Should not be None because we checked it is some")
+							.block_id
+					)
+					.expect("Block with invalid id in world")
+					.collision
 				{
-					new_player.on_ground = true;
+					Collision::Solid => {
+						//if on ground, stop vertical velocity and unclip the old_player from the block below
+						new_player.vy = 0.0;
+						new_player.y = new_player.y.ceil();
+						new_player.on_ground = true
+					},
+					_ => {},
 				}
 			}
 		}
@@ -85,9 +100,9 @@ pub(crate) fn update_position() {
 pub(crate) fn predict_final_position() -> Player {
 	let mut current_player = PLAYER.with_borrow(|player| (*player).clone());
 
-	while current_player.vx.abs() < 0.01
-		&& current_player.vy.abs() < 0.01
-		&& current_player.vz.abs() < 0.01
+	while current_player.vx.abs() > 0.01
+		|| current_player.vy.abs() > 0.01
+		|| current_player.vz.abs() > 0.01
 	{
 		current_player = process_motion(&current_player);
 	}
