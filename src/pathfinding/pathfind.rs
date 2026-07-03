@@ -55,7 +55,8 @@ impl Path {
 	}
 
 	//will return the next node in the path from the position passed to the goal. will return None if this node does not exist
-	pub(crate) fn trace_path(&self, position: &Coordinates) -> Option<Coordinates> {
+	pub(crate) fn trace_path(&mut self, position: &Coordinates) -> Option<Coordinates> {
+		self.compute_shortest_path().unwrap();
 		return Some(self.nodes.get(position)?.previous);
 	}
 
