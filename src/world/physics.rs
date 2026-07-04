@@ -60,7 +60,7 @@ pub(crate) fn process_motion(old_player: &Player) -> Player {
 		}
 	} else {
 		//check if player should stop falling
-		if new_player.y < old_player.y.floor() && old_player.y > old_player.y.floor() {
+		if new_player.y <= old_player.y.floor() && old_player.y >= old_player.y.floor() {
 			if block_below.is_some() {
 				//TODO: cleanup
 				match BLOCK_REGISTRY
