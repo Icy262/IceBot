@@ -35,9 +35,9 @@ Movements:
             let mut packets: Vec<Packets> = Vec::new();
 
             PLAYER.with_borrow_mut(|player| {
-                //accelerate the player a total of 0.2 blocks/tick on the x/z axes
-                player.vx += -0.2 * player.yaw.sin();
-                player.vz += 0.2 * player.yaw.cos();
+                //accelerate the player a total of 0.02 blocks/tick on the x/z axes
+                player.vx += -0.02 * player.yaw.to_radians().sin();
+                player.vz += 0.02 * player.yaw.to_radians().cos();
             });
 
             //process motion
