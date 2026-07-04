@@ -7,18 +7,22 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::{cell::RefCell, collections::LinkedList};
 
-use crate::behaviour;
-use crate::behaviour::actions::{Actions, DoNothing, Join, Look, do_action, to_packets};
+use crate::{BLOCK_REGISTRY, behaviour, world};
+use crate::behaviour::actions::{Actions, DoNothing, Join, do_action};
 use crate::behaviour::behaviour::Behaviour;
+use crate::behaviour::movements::to_packets;
 use crate::behaviour::movements::{Jump, Movements, NoInput, Walk, do_movement};
+use crate::hierarchical_task_network::hierarchical_task_network::HierarchicalTaskNetwork;
 use crate::network::data_types::{MCBool, MCDouble, MCFloat};
 use crate::network::data_types::{MCMetadata, MCUByte};
 use crate::network::network_connection;
 use crate::network::packets::write_packet;
 use crate::network::packets::{KeepAlive, Packets, PlayerPositionandLook};
 use crate::player::Player;
+use crate::scheduler::scheduler::Schedule;
+use crate::tasks::go_to::GoTo;
 use crate::world::block::{self, Block, Coordinates};
-use crate::world::world::{World, WorldUpdate};
+use crate::world::world::{WORLD_MODEL, World, WorldUpdate};
 
 thread_local! {
 	pub(crate) static PLAYER: RefCell<Player> = RefCell::new(
@@ -52,8 +56,6 @@ pub(crate) fn bot_main(username: String, server: String) {
 	let network_manager =
 		thread::spawn(move || network_connection::read_manager(&mut server_connection_clone, tx));
 
-	let mut behaviour_queue: VecDeque<Behaviour> = VecDeque::new();
-
 	//Initialize the player position and verify it to the server
 	let position_and_look = rx.recv().expect("Connection failed");
 	match position_and_look {
@@ -71,20 +73,28 @@ pub(crate) fn bot_main(username: String, server: String) {
 	}
 	do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
 
+	let mut task_scheduler = Schedule::new();
+
+	//for testing only
+	let walk_task = HierarchicalTaskNetwork::new(crate::tasks::tasks::Tasks::GoTo(GoTo::new(
+		&PLAYER.with_borrow(|&player| {
+			return Coordinates {
+				x: player.x as i32 - 5,
+				y: player.y as i32,
+				z: player.z as i32 - 3,
+			};
+		}),
+	)));
+	task_scheduler.push_task_network(walk_task, Box::new(|| return 1));
+
+	let mut count = 0;
 	loop {
 		let keep_alive = Packets::KeepAlive(KeepAlive {});
 		write_packet(&mut server_connection, keep_alive);
 
-		if !behaviour_queue.is_empty() {
-			let behaviour = behaviour_queue
-				.pop_front()
-				.expect("Should not be none because we just checked that it is some");
-			do_action(behaviour.action, &mut server_connection);
-			do_movement(behaviour.movement, &mut server_connection)
-		} else {
-			do_action(Actions::DoNothing(DoNothing {}), &mut server_connection);
-			do_movement(Movements::NoInput(NoInput {}), &mut server_connection);
-		}
+		let Some(behaviour) = task_scheduler.get_next_behaviour() else { println!("skipped"); continue; };
+		do_action(behaviour.action, &mut server_connection);
+		do_movement(behaviour.movement, &mut server_connection);
 
 		std::thread::sleep(time::Duration::from_millis(50));
 	}
