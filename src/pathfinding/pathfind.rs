@@ -15,8 +15,6 @@ use crate::world::world::World;
 //stores the required data for D* lite to work with a node
 #[derive(Clone, Copy)]
 struct Node {
-	//on the path from this node to the goal, the next node/the previous node on the graph (because the graph orgiginates at the goal and works backwards)
-	pub(super) previous: Coordinates,
 	//one step look ahead based on g. see paper for more details
 	pub(super) rhs: u32,
 	//cost to goal. we know this because we know the rest of the path to the goal
@@ -29,11 +27,10 @@ pub(crate) struct Path {
 	s_start: Coordinates,
 	//Desired destination of player. This is where the seach starts (see D* lite for reasoning)
 	s_goal: Coordinates,
-	//Maps a coordinate to the next coordinate in the path from the first coordinate to the end coordinate, plus some other data D* lite requires. This is done because it is faster and more space efficient than storing a vec of nodes
+	//Maps a coordinate to the associated node, which contains the rhs and g values. This is done because it is faster and more space efficient than storing a vec of all the nodes
 	nodes: HashMap<Coordinates, Node>,
 	//priority queue
 	U: PriorityQueue,
-	//unsure what this does. TODO: figure out what it is
 	k_m: u32,
 }
 
@@ -41,23 +38,51 @@ pub(crate) struct Path {
 impl Path {
 	//TODO: implement remainder, per paper
 	pub(crate) fn new(s_start: &Coordinates, s_goal: &Coordinates) -> Self {
-		return Self {
+		let mut path = Self {
 			s_start: *s_start,
 			s_goal: *s_goal,
 			nodes: HashMap::new(),
 			U: PriorityQueue::new(),
 			k_m: 0,
 		};
+		
+		path.nodes.insert(
+			*s_start,
+			Node {
+				g: u32::MAX,
+				rhs: u32::MAX,
+			},
+		);
+
+		path.nodes.insert(
+			*s_goal,
+			Node {
+				g: u32::MAX,
+				rhs: 0,
+			},
+		);
+
+		let goal = &path.calculate_key(s_goal).expect("goal node cannot be undefined because we just inserted it");
+		path.U.insert_or_update(s_goal, goal);
+		
+		return path;
 	}
 
 	pub(crate) fn update_position(&mut self, new_s_start: &Coordinates) {
 		self.s_start = *new_s_start;
+		self.nodes.insert(
+			*new_s_start,
+			Node {
+				g: u32::MAX,
+				rhs: u32::MAX,
+			}
+		);
 	}
 
 	//will return the next node in the path from the position passed to the goal. will return None if this node does not exist
 	pub(crate) fn trace_path(&mut self, position: &Coordinates) -> Option<Coordinates> {
-		self.compute_shortest_path().unwrap();
-		return Some(self.nodes.get(position)?.previous);
+		self.compute_shortest_path()?;
+		return self.best_successor(position).ok();
 	}
 
 	//TODO: implement updating edge costs
@@ -254,6 +279,24 @@ impl Path {
 			}
 			return Ok(result);
 		}
+	}
+
+	//returns the node for s_prime that would produce the lowest g(s_prime) + c(s_prime, s) where s_prime is the pred(s)
+	fn best_successor(&self, s: &Coordinates) -> Result<Coordinates, &'static str> {
+		let mut best = None;
+		let mut best_cost = u32::MAX;
+
+		for succ in Path::succ(s) {
+			let node = self.nodes.get(&succ).ok_or("could not find node")?;
+			let cost = node.g + Path::c(s, &succ);
+
+			if cost < best_cost {
+				best_cost = cost;
+				best = Some(succ);
+			}
+		}
+
+		best.ok_or("no path exists")
 	}
 
 	//returns the estimated cost between two points
