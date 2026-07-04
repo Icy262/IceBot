@@ -11,8 +11,478 @@ Block Types:
         collision: solid
         transparency: opaque
 
+    -   friendly name: grass
+        id: 2
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: dirt
+        id: 3
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: cobblestone
+        id: 4
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: planks
+        id: 5
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: sapling
+        id: 6
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: bedrock
+        id: 7
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: water
+        id: 8
+        collision: liquid
+        transparency: transparent
+
+    -   friendly name: water
+        id: 9
+        collision: liquid
+        transparency: transparent
+
+    -   friendly name: lava
+        id: 10
+        collision: liquid
+        transparency: transparent
+
+    -   friendly name: lava
+        id: 11
+        collision: liquid
+        transparency: transparent
+
     -   friendly name: sand
         id: 12
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: gravel
+        id: 13
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: gold ore
+        id: 14
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: iron ore
+        id: 15
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: coal ore
+        id: 16
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: log
+        id: 17
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: leaves
+        id: 18
+        collision: solid
+        transparency: transparent
+
+    -   friendly name: sponge
+        id: 19
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: glass
+        id: 20
+        collision: solid
+        transparency: transparent
+
+    -   friendly name: lapis ore
+        id: 21
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: lapis block
+        id: 22
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: dispenser
+        id: 23
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: sandstone
+        id: 24
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: noteblock
+        id: 25
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: bed
+        id: 26
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: powered rail
+        id: 27
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: detector rail
+        id: 28
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: sticky piston
+        id: 29
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: cobwebs
+        id: 30
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: decorative plants
+        id: 31
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: dead bush
+        id: 32
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: piston
+        id: 33
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: piston head
+        id: 34
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: wool
+        id: 35
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: moving block
+        id: 36
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: dandelion
+        id: 37
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: rose
+        id: 38
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: brown mushroom
+        id: 39
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: red mushroom
+        id: 40
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: gold block
+        id: 41
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: iron block
+        id: 42
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: double slab
+        id: 43
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: single slab
+        id: 44
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: bricks
+        id: 45
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: tnt
+        id: 46
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: bookcase
+        id: 47
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: mossy cobblestone
+        id: 48
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: obsidian
+        id: 49
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: torch
+        id: 50
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: fire
+        id: 51
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: spawner block
+        id: 52
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: wood stair
+        id: 53
+        collision: solid
+        transparency: transparent
+
+    -   friendly name: chest
+        id: 54
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: redstone dust
+        id: 55
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: diamond ore
+        id: 56
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: diamond block
+        id: 57
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: crafting table
+        id: 58
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: crops
+        id: 59
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: farmland
+        id: 60
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: furnace
+        id: 61
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: lit furnace
+        id: 62
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: sign
+        id: 63
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: wooden door
+        id: 64
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: ladder
+        id: 65
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: rail
+        id: 66
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: stone stair
+        id: 67
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: wall sign
+        id: 68
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: lever
+        id: 69
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: stone pressure plate
+        id: 70
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: iron door
+        id: 71
+        collision: solid
+        transparency: transparent
+
+    -   friendly name: wood pressure plate
+        id: 72
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: redstone ore
+        id: 73
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: lit redstone ore
+        id: 74
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: unlit redstone torch
+        id: 75
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: redstone torch
+        id: 76
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: stone button
+        id: 77
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: snow layer
+        id: 78
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: ice block
+        id: 79
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: snow block
+        id: 80
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: cactus
+        id: 81
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: clay
+        id: 82
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: sugarcane
+        id: 83
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: jukebox
+        id: 84
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: fence
+        id: 85
+        collision: solid
+        transparency: transparent
+
+    -   friendly name: pumpkin
+        id: 86
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: netherrack
+        id: 87
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: soul sand
+        id: 88
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: glowstone
+        id: 89
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: nether portal
+        id: 90
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: jack-o-lantern
+        id: 91
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: cake
+        id: 92
+        collision: solid
+        transparency: transparent
+
+    -   friendly name: unpowered redstone repeater
+        id: 93
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: powered redstone repeater
+        id: 94
+        collision: non-solid
+        transparency: transparent
+
+    -   friendly name: old chest
+        id: 95
+        collision: solid
+        transparency: opaque
+
+    -   friendly name: wooden trapdoor
+        id: 96
         collision: solid
         transparency: opaque
 
