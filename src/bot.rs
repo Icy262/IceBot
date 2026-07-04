@@ -92,6 +92,31 @@ pub(crate) fn bot_main(username: String, server: String) {
 		let keep_alive = Packets::KeepAlive(KeepAlive {});
 		write_packet(&mut server_connection, keep_alive);
 
+		if let Ok(msg) = rx.try_recv() {
+			match msg {
+				WorldUpdate::PlayerUpdate(position_and_look) => {
+					println!("Recieved position update from server");
+					PLAYER.with_borrow_mut(|player| {
+						player.x = position_and_look.x;
+						player.y = position_and_look.y;
+						player.z = position_and_look.z;
+						player.yaw = position_and_look.yaw;
+						player.pitch = position_and_look.pitch;
+						player.on_ground = position_and_look.on_ground;
+						player.vx = 0.0;
+						player.vy = 0.0;
+						player.vz = 0.0;
+					});
+
+					let packets = to_packets(Movements::NoInput(NoInput {})).remove(0);
+					write_packet(&mut server_connection, packets);
+
+					continue;
+				}
+				_ => panic!("Should be a position and look"),
+			}
+		}
+
 		let Some(behaviour) = task_scheduler.get_next_behaviour() else { println!("skipped"); continue; };
 		do_action(behaviour.action, &mut server_connection);
 		do_movement(behaviour.movement, &mut server_connection);
