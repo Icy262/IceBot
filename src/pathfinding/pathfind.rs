@@ -13,7 +13,7 @@ use crate::world::world::World;
 //http://www.cs.cmu.edu/~maxim/files/dlite_icra02.pdf
 
 //stores the required data for D* lite to work with a node
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct Node {
 	//one step look ahead based on g. see paper for more details
 	pub(super) rhs: u32,
@@ -45,43 +45,46 @@ impl Path {
 			U: PriorityQueue::new(),
 			k_m: 0,
 		};
-		
-		path.nodes.insert(
-			*s_start,
-			Node {
-				g: u32::MAX,
-				rhs: u32::MAX,
-			},
-		);
 
 		path.nodes.insert(
 			*s_goal,
 			Node {
-				g: u32::MAX,
+				g: u32::MAX / 4,
 				rhs: 0,
 			},
 		);
 
-		let goal = &path.calculate_key(s_goal).expect("goal node cannot be undefined because we just inserted it");
-		path.U.insert_or_update(s_goal, goal);
+		path.nodes.insert(
+			*s_start,
+			Node {
+				g: u32::MAX / 4,
+				rhs: u32::MAX / 4,
+			},
+		);
+
+		path.update_vertex(s_goal);
+		path.update_vertex(s_start); //TODO: consider removing
 		
 		return path;
 	}
 
 	pub(crate) fn update_position(&mut self, new_s_start: &Coordinates) {
+		self.k_m += self.h(&self.s_start, new_s_start);
 		self.s_start = *new_s_start;
-		self.nodes.insert(
-			*new_s_start,
-			Node {
-				g: u32::MAX,
-				rhs: u32::MAX,
-			}
-		);
+		self
+			.nodes
+			.entry(*new_s_start)
+			.or_insert(
+				Node {
+					g: u32::MAX / 4,
+					rhs: u32::MAX / 4,
+				}
+			);
 	}
 
 	//will return the next node in the path from the position passed to the goal. will return None if this node does not exist
 	pub(crate) fn trace_path(&mut self, position: &Coordinates) -> Option<Coordinates> {
-		self.compute_shortest_path()?;
+		self.compute_shortest_path().ok()?;
 		return self.best_successor(position).ok();
 	}
 
@@ -97,7 +100,7 @@ impl Path {
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) -> Result<(), &'static str> {
-		let node = self.nodes.get(u).ok_or("u not found")?;
+		let node = self.nodes.get(&u).unwrap_or(&Node { rhs: u32::MAX / 4, g: u32::MAX / 4 });
 		let node_consistent = node.g == node.rhs;
 
 		if node_consistent {
@@ -112,46 +115,49 @@ impl Path {
 
 	//outside behaviour should be the same as the function in the paper. internal mechanics differ slightly
 	fn compute_shortest_path(&mut self) -> Result<(), &'static str> {
-		let s_start_node = (*self
-			.nodes
-			.get(&self.s_start)
-			.ok_or("start node not defined")?)
-		.clone();
-		let s_start_key = self
-			.calculate_key(&(self.s_start.clone()))
-			.ok_or("start node not defined")?;
-		while self.U.peek().ok_or("no solution exists")?.1 < s_start_key
-			|| s_start_node.rhs != s_start_node.g
+		while {
+			let s_start_node = self
+				.nodes
+				.get(&self.s_start)
+				.ok_or("start node not found")?
+				.clone();
+			let s_start_key = self
+				.calculate_key(&(self.s_start.clone()))
+				.ok_or("start node not defined")?
+				.clone();
+
+			self.U.peek().ok_or("queue empty and no solution found")?.1 < s_start_key
+				|| s_start_node.rhs != s_start_node.g
+		}
 		{
-			let (u, k_old) = self.U.pop().ok_or("no solution exists")?;
+			let (u, k_old) = self.U.pop().ok_or("no solution exists 2")?;
 			let k_new = self.calculate_key(&u).ok_or("could not calculate key")?;
 
-			let node_u = self.nodes.get_mut(&u).ok_or("could not find node")?;
+			let node_u = self.nodes.entry(u).or_insert(Node { rhs: u32::MAX / 4, g: u32::MAX / 4 });
 			if k_old < k_new {
 				self.U.insert_or_update(&u, &k_new);
 			} else if node_u.g > node_u.rhs {
 				node_u.g = node_u.rhs;
+				let node_u_g = node_u.g; //so we don't mut borrow twice
 				for s in Path::pred(&u) {
+					let bellman = self.bellman(&s);
 					if s != self.s_goal {
-						let g = self.nodes.get(&u).ok_or("could not find node")?.g;
-						let node_s = self.nodes.get_mut(&s).ok_or("could not find node")?;
-						node_s.rhs = Ord::min(node_s.rhs, Path::c(&s, &u) + g);
+						let node_s = self.nodes.entry(s).or_insert(Node { rhs: u32::MAX / 4, g: u32::MAX / 4 });
+						node_s.rhs = bellman;
 					}
 					self.update_vertex(&s)?;
 				}
 			} else {
-				let g_old = node_u.g;
-				node_u.g = u32::MAX;
+				node_u.g = u32::MAX / 4;
 				let mut u_self_and_adjacent = Self::pred(&u);
 				u_self_and_adjacent.push(u);
+
 				for s in u_self_and_adjacent {
-					let bellman = self.bellman(&s)?;
-					let node_s = self.nodes.get_mut(&s).ok_or("could not find node")?;
-					if node_s.rhs == Path::c(&s, &u) + g_old || s == u {
-						if s != self.s_goal {
-							node_s.rhs = bellman;
-						}
-					}
+					self
+						.nodes
+						.entry(s)
+						.or_insert(Node { rhs: u32::MAX / 4, g: u32::MAX / 4 })
+						.rhs = self.bellman(&s);
 					self.update_vertex(&s)?;
 				}
 			}
@@ -187,7 +193,7 @@ impl Path {
 					.expect("ID of block should be in BLOCK_REGISTRY")
 					.collision
 				{
-					Collision::NonSolid => 1,
+					Collision::NonSolid => 0,
 					Collision::Liquid => 3,
 					Collision::Solid => 5,
 				}
@@ -206,7 +212,7 @@ impl Path {
 					.expect("ID of block should be in BLOCK_REGISTRY")
 					.collision
 				{
-					Collision::NonSolid => 1,
+					Collision::NonSolid => 0,
 					Collision::Liquid => 3,
 					Collision::Solid => 5,
 				}
@@ -236,7 +242,8 @@ impl Path {
 			}
 		};
 
-		return head_price + feet_price + support_price;
+		//cost of 1 to walk, plus the cost of the world changes required
+		return 1 + head_price + feet_price + support_price;
 	}
 
 	//not sure how to implement. returning the coordinates of nodes already in the graph may cause the algorithm to overflow and crash. if this happens, consider checking vertice presence in the list of nodes before adding it to the return vec
@@ -248,7 +255,7 @@ impl Path {
 			Coordinates { y: s.y + 1, ..*s },
 			Coordinates { y: s.y - 1, ..*s },
 			Coordinates { z: s.z + 1, ..*s },
-			Coordinates { z: s.z + 1, ..*s },
+			Coordinates { z: s.z - 1, ..*s },
 		];
 	}
 
@@ -261,30 +268,32 @@ impl Path {
 			Coordinates { y: s.y + 1, ..*s },
 			Coordinates { y: s.y - 1, ..*s },
 			Coordinates { z: s.z + 1, ..*s },
-			Coordinates { z: s.z + 1, ..*s },
+			Coordinates { z: s.z - 1, ..*s },
 		];
 	}
 
 	//returns the value of g(s_prime) + c(s_prime, s) where s_prime is the pred(s) that produces the smallest value
-	fn bellman(&self, s: &Coordinates) -> Result<u32, &'static str> {
-		if *s == self.s_start {
-			return Ok(0);
-		} else {
-			let mut result = u32::MAX;
-			for s_prime in Path::pred(s) {
-				result = Ord::min(
-					result,
-					self.nodes.get(&s_prime).ok_or("could not find node")?.g + Path::c(&s_prime, s),
-				);
-			}
-			return Ok(result);
+	fn bellman(&self, s: &Coordinates) -> u32 {
+		if *s == self.s_goal {
+			return 0;
 		}
+
+		let mut result = u32::MAX / 4;
+
+		for s_prime in Path::pred(s) {
+			result = Ord::min(
+				result,
+				self.nodes.get(&s_prime).unwrap_or(&Node { rhs: u32::MAX / 4, g: u32::MAX / 4 }).g + Path::c(s, &s_prime),
+			);
+		}
+
+		return result;
 	}
 
 	//returns the node for s_prime that would produce the lowest g(s_prime) + c(s_prime, s) where s_prime is the pred(s)
 	fn best_successor(&self, s: &Coordinates) -> Result<Coordinates, &'static str> {
 		let mut best = None;
-		let mut best_cost = u32::MAX;
+		let mut best_cost = u32::MAX / 4;
 
 		for succ in Path::succ(s) {
 			let node = self.nodes.get(&succ).ok_or("could not find node")?;
