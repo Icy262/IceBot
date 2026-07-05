@@ -1,4 +1,4 @@
-use crate::behaviour::actions::{Actions, Look};
+use crate::behaviour::actions::{Actions, DoNothing};
 use crate::behaviour::behaviour::Behaviour;
 use crate::behaviour::movements::{Jump, Movements, NoInput, Walk};
 use crate::bot::PLAYER;
@@ -28,6 +28,7 @@ impl GoTo {
 	}
 
 	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+		println!("1");
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
 				x: player.x.floor() as i32,
@@ -39,17 +40,25 @@ impl GoTo {
 		self.path.update_position(&current_pos);
 		let next_position = self.path.trace_path(&current_pos)?;
 
+		//TODO: add support for breaking blocks by pushing a block break to the queue and climbing ladders and stuff
 		let movement = if next_position.y > current_pos.y {
 			Movements::Jump(Jump {})
 		} else {
 			Movements::Walk(Walk {})
 		};
 
+		PLAYER.with_borrow_mut(|player| {
+			//add 0.5 so we target center of block
+			let dx = next_position.x as f64 + 0.5 - player.x;
+			let dz = next_position.z as f64 + 0.5 - player.z;
+			
+			player.pitch = 0.0;
+			player.yaw = -(dx.atan2(dz)).to_degrees();
+		});
+
 		return Some(Behaviour {
 			movement: movement,
-			action: Actions::Look(Look {
-				target: next_position,
-			}),
+			action: Actions::DoNothing(DoNothing {}),
 		});
 	}
 
