@@ -6,7 +6,6 @@ use std::net::TcpStream;
 pub(crate) enum Actions {
 	Join(Join),
 	DoNothing(DoNothing),
-	Look(Look),
 	PlaceBlock(PlaceBlock),
 	PlaceBlockAgainst(PlaceBlockAgainst),
 }
@@ -15,7 +14,6 @@ pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {
 	match action {
 		Actions::Join(action) => Join::to_packets(action),
 		Actions::DoNothing(action) => DoNothing::to_packets(action),
-		Actions::Look(action) => Look::to_packets(action),
 		Actions::PlaceBlock(action) => PlaceBlock::to_packets(action),
 		Actions::PlaceBlockAgainst(action) => PlaceBlockAgainst::to_packets(action),
 	}
@@ -34,10 +32,6 @@ pub(crate) struct Join {
 }
 
 pub(crate) struct DoNothing {}
-
-pub(crate) struct Look {
-	pub(crate) target: Coordinates, //Coordinates that bot will look at
-}
 
 pub(crate) struct BreakBlock {
 	pub(crate) position: Coordinates, //coordinates of the block to break
