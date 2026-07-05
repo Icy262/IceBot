@@ -66,14 +66,14 @@ impl PriorityQueue {
 
 	//like pop but does not delete the returned value
 	pub fn peek(&mut self) -> Option<(Coordinates, Key)> {
-		while let Some((Reverse(key), state)) = self.priority_queue.pop() {
+		while let Some((Reverse(key), state)) = self.priority_queue.peek() {
 			match self.key_map.get(&state) {
-				Some(&key_map_key) => {
-					if key_map_key == key {
-						return Some((state, key));
-					}
+				Some(&key_map_key) if key_map_key == *key => {
+					return Some((*state, *key));
 				}
-				None => continue,
+				_ => {
+					self.priority_queue.pop();
+				},
 			}
 		}
 
