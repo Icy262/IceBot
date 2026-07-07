@@ -1,6 +1,7 @@
+use crate::behaviour;
 use crate::behaviour::behaviour::Behaviour;
 use crate::tasks::{clear_region::ClearRegion, find_item::FindItem, gather::Gather, go_to::GoTo};
-use crate::world::block::Coordinates;
+use crate::hierarchical_task_network::hierarchical_task_network::Next;
 
 pub(crate) enum Tasks {
 	GoTo(GoTo),
@@ -10,13 +11,13 @@ pub(crate) enum Tasks {
 }
 
 impl Tasks {
-	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
-		return match self {
-			Tasks::GoTo(task) => task.get_next_behaviour(),
-			Tasks::Gather(task) => task.get_next_behaviour(),
-			Tasks::FindItem(task) => task.get_next_behaviour(),
-			Tasks::ClearRegion(task) => task.get_next_behaviour(),
-		};
+	pub(crate) fn get_next(&mut self) -> Option<Next> {
+		match self {
+			Tasks::GoTo(task) => task.get_next(),
+			Tasks::Gather(task) => task.get_next(),
+			Tasks::FindItem(task) => task.get_next(),
+			Tasks::ClearRegion(task) => task.get_next(),
+		}
 	}
 
 	pub(crate) fn complete(&self) -> bool {
