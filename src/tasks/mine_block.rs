@@ -1,4 +1,5 @@
 use crate::{bot::PLAYER, pathfinding::pathfind::Path, world::block::Coordinates};
+use crate::behaviour::behaviour::Behaviour;
 
 //Pathfind to next to a block, break it, and (optionally) pick up the item it drops (if it drops one)
 pub(crate) struct MineBlock {
@@ -24,8 +25,21 @@ impl MineBlock {
 		};
 	}
 
-	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+	pub(crate) fn get_next_behaviour(&mut self) { //-> Option<Behaviour> {
 		//phase 1: path to block
+		let current_pos = PLAYER.with_borrow(|player| {
+			return Coordinates {
+				x: player.x.floor() as i32,
+				y: player.y.floor() as i32,
+				z: player.z.floor() as i32,
+			};
+		});
+
+		//TODO: implement actual line of sight and distance check instead of just checking +- on all axes
+		if (self.position.x - current_pos.x).abs() >= 1 && (self.position.y - current_pos.y).abs() >= 1 && (self.position.z - current_pos.z).abs() >= 1 {
+			//push goto
+		}
+
 		//phase 2: break
 		//phase 3 (optional): pickup item
 	}
