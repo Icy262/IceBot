@@ -24,8 +24,16 @@ impl HierarchicalTaskNetwork {
 			return self.get_next_behaviour();
 		}
 
-		//if elementary task, return it, if not, break it down, and call this fn recursively
-		return task.get_next_behaviour();
+		//get next of task. if it is a behaviour, return it, if it is a task, push it to the front of the task queue and call recursively until a behaviour is found
+		task.get_next()
+			.map(|next| match next {
+				Next::Task(task) => {
+					self.tasks.push_front(task);
+					self.get_next_behaviour()
+				}
+				Next::Behaviour(behaviour) => Some(behaviour),
+			})
+			.flatten()
 	}
 
 	pub(crate) fn complete(&self) -> bool {
