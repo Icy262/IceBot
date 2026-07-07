@@ -30,3 +30,8 @@ impl HierarchicalTaskNetwork {
 		return self.tasks.len() == 0;
 	}
 }
+
+pub(crate) enum Next {
+	Task(Tasks),
+	Behaviour(Behaviour),	
+}
