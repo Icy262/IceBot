@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::behaviour::actions::{Actions, DoNothing};
 use crate::behaviour::behaviour::Behaviour;
 use crate::behaviour::movements::Movements;
@@ -5,12 +7,12 @@ use crate::behaviour::movements::NoInput;
 use crate::tasks::tasks::Tasks;
 
 pub(crate) struct HierarchicalTaskNetwork {
-	tasks: Vec<Tasks>,
+	tasks: VecDeque<Tasks>,
 }
 
 impl HierarchicalTaskNetwork {
 	pub(crate) fn new(task: Tasks) -> Self {
-		return Self { tasks: vec![task] };
+		return Self { tasks: VecDeque::from(task) };
 	}
 
 	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
@@ -18,7 +20,7 @@ impl HierarchicalTaskNetwork {
 
 		//we must check if the task we just got is complete. if it's complete, remove it and call this fn recursively until we find a task that still needs doing, or the HTN is resolved
 		if task.complete() {
-			self.tasks.remove(0);
+			self.tasks.pop_front();
 			return self.get_next_behaviour();
 		}
 
