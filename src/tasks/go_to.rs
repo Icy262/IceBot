@@ -2,6 +2,7 @@ use crate::behaviour::actions::{Actions, DoNothing};
 use crate::behaviour::behaviour::Behaviour;
 use crate::behaviour::movements::{Jump, Movements, NoInput, Walk};
 use crate::bot::PLAYER;
+use crate::hierarchical_task_network::hierarchical_task_network::Next;
 use crate::pathfinding::pathfind::Path;
 use crate::world::block::Coordinates;
 
@@ -27,7 +28,7 @@ impl GoTo {
 		};
 	}
 
-	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+	pub(crate) fn get_next_behaviour(&mut self) -> Option<Next> {
 		println!("1");
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
@@ -51,15 +52,15 @@ impl GoTo {
 			//add 0.5 so we target center of block
 			let dx = next_position.x as f64 + 0.5 - player.x;
 			let dz = next_position.z as f64 + 0.5 - player.z;
-			
+
 			player.pitch = 0.0;
 			player.yaw = -(dx.atan2(dz)).to_degrees();
 		});
 
-		return Some(Behaviour {
+		Some(Next::Behaviour(Behaviour {
 			movement: movement,
 			action: Actions::DoNothing(DoNothing {}),
-		});
+		}))
 	}
 
 	pub(crate) fn complete(&self) -> bool {
