@@ -23,4 +23,10 @@ impl MineBlock {
 			pickup_item: pickup_item,
 		};
 	}
+
+	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+		//phase 1: path to block
+		//phase 2: break
+		//phase 3 (optional): pickup item
+	}
 }
