@@ -1,8 +1,8 @@
+use crate::world::entity::Position;
+
 #[derive(Copy, Clone)]
 pub(crate) struct Player {
-	pub(crate) x: f64,
-	pub(crate) y: f64,
-	pub(crate) z: f64,
+	pub(crate) position: Position,
 	//Velocity is in blocks per tick
 	pub(crate) vx: f64,
 	pub(crate) vy: f64,
