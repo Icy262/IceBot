@@ -1,6 +1,7 @@
 use crate::behaviour::actions::{Actions, DoNothing};
 use crate::behaviour::behaviour::Behaviour;
 use crate::behaviour::movements::{Movements, NoInput};
+use crate::hierarchical_task_network::hierarchical_task_network::Next;
 use crate::world::block::Coordinates;
 use crate::world::world::{WORLD_MODEL, World};
 
@@ -17,7 +18,7 @@ pub(crate) struct ClearRegion {
 //TODO: implement max number of tasks generated at once
 
 impl ClearRegion {
-	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
+	pub(crate) fn get_next(&mut self) -> Option<Next> {
 		return None;
 	}
 
