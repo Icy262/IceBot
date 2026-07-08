@@ -28,7 +28,7 @@ impl GoTo {
 		};
 	}
 
-	pub(crate) fn get_next_behaviour(&mut self) -> Option<Next> {
+	pub(crate) fn get_next(&mut self) -> Option<Next> {
 		println!("1");
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
