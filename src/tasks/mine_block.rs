@@ -65,6 +65,7 @@ impl MineBlock {
 		}))
 
 		//phase 3 (optional): pickup item
+		//TODO: implement once GotoEntity is implemented
 	}
 
 	pub(crate) fn complete(&self) -> bool {
