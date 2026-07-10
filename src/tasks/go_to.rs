@@ -16,9 +16,9 @@ impl GoTo {
 	pub(crate) fn new(goal: &Coordinates) -> Self {
 		let start = PLAYER.with_borrow(|player| {
 			return Coordinates {
-				x: player.x.floor() as i32,
-				y: player.y.floor() as i32,
-				z: player.z.floor() as i32,
+				x: player.position.x.floor() as i32,
+				y: player.position.y.floor() as i32,
+				z: player.position.z.floor() as i32,
 			};
 		});
 
@@ -32,9 +32,9 @@ impl GoTo {
 		println!("1");
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
-				x: player.x.floor() as i32,
-				y: player.y.floor() as i32,
-				z: player.z.floor() as i32,
+				x: player.position.x.floor() as i32,
+				y: player.position.y.floor() as i32,
+				z: player.position.z.floor() as i32,
 			};
 		});
 
@@ -50,8 +50,8 @@ impl GoTo {
 
 		PLAYER.with_borrow_mut(|player| {
 			//add 0.5 so we target center of block
-			let dx = next_position.x as f64 + 0.5 - player.x;
-			let dz = next_position.z as f64 + 0.5 - player.z;
+			let dx = next_position.x as f64 + 0.5 - player.position.x;
+			let dz = next_position.z as f64 + 0.5 - player.position.z;
 
 			player.pitch = 0.0;
 			player.yaw = -(dx.atan2(dz)).to_degrees();
@@ -66,9 +66,9 @@ impl GoTo {
 	pub(crate) fn complete(&self) -> bool {
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
-				x: player.x.floor() as i32,
-				y: player.y.floor() as i32,
-				z: player.z.floor() as i32,
+				x: player.position.x.floor() as i32,
+				y: player.position.y.floor() as i32,
+				z: player.position.z.floor() as i32,
 			};
 		});
 
