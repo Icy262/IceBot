@@ -66,4 +66,17 @@ impl MineBlock {
 
 		//phase 3 (optional): pickup item
 	}
+
+	pub(crate) fn complete(&self) -> bool {
+		World::get_block(self.position).is_some_and(|block| {
+			match BLOCK_REGISTRY
+				.get(&block.block_id)
+				.expect("block should be in registry")
+				.collision
+			{
+				Collision::Solid => true,
+				_ => false,
+			}
+		})
+	}
 }
