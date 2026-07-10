@@ -1,4 +1,14 @@
+use crate::BLOCK_REGISTRY;
+use crate::behaviour::actions::Actions;
+use crate::behaviour::actions::{BreakBlock, DoNothing};
 use crate::behaviour::behaviour::Behaviour;
+use crate::behaviour::movements::Movements;
+use crate::behaviour::movements::NoInput;
+use crate::hierarchical_task_network::hierarchical_task_network::Next;
+use crate::registry::block_type::Collision;
+use crate::tasks::go_to::GoTo;
+use crate::tasks::tasks::Tasks;
+use crate::world::world::World;
 use crate::{bot::PLAYER, pathfinding::pathfind::Path, world::block::Coordinates};
 
 //Pathfind to next to a block, break it, and (optionally) pick up the item it drops (if it drops one)
@@ -25,7 +35,7 @@ impl MineBlock {
 		};
 	}
 
-	pub(crate) fn get_next_behaviour(&mut self) {
+	pub(crate) fn get_next(&mut self) -> Option<Next> {
 		//-> Option<Behaviour> {
 		//phase 1: path to block
 		let current_pos = PLAYER.with_borrow(|player| {
@@ -41,10 +51,19 @@ impl MineBlock {
 			&& (self.position.y - current_pos.y).abs() >= 1
 			&& (self.position.z - current_pos.z).abs() >= 1
 		{
-			//push goto
+			return Some(Next::Task(Tasks::GoTo(GoTo::new(&self.position))));
 		}
 
 		//phase 2: break
+		//TODO: implement targeting correct face
+		Some(Next::Behaviour(Behaviour {
+			movement: Movements::NoInput(NoInput {}),
+			action: Actions::BreakBlock(BreakBlock {
+				position: self.position,
+				face: crate::world::block::Direction::North,
+			}),
+		}))
+
 		//phase 3 (optional): pickup item
 	}
 }
