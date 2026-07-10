@@ -6,6 +6,7 @@ use std::net::TcpStream;
 pub(crate) enum Actions {
 	Join(Join),
 	DoNothing(DoNothing),
+	BreakBlock(BreakBlock),
 	PlaceBlock(PlaceBlock),
 	PlaceBlockAgainst(PlaceBlockAgainst),
 }
@@ -14,6 +15,7 @@ pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {
 	match action {
 		Actions::Join(action) => Join::to_packets(action),
 		Actions::DoNothing(action) => DoNothing::to_packets(action),
+		Actions::BreakBlock(action) => BreakBlock::to_packets(action),
 		Actions::PlaceBlock(action) => PlaceBlock::to_packets(action),
 		Actions::PlaceBlockAgainst(action) => PlaceBlockAgainst::to_packets(action),
 	}
