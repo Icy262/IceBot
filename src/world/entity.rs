@@ -1,5 +1,6 @@
 use crate::network::data_types::MCMetadata;
 
+#[derive(Clone, Copy)]
 pub(crate) struct Position {
 	pub(crate) x: f64,
 	pub(crate) y: f64,
