@@ -64,22 +64,17 @@ impl Path {
 
 		path.update_vertex(s_goal);
 		path.update_vertex(s_start); //TODO: consider removing
-		
+
 		return path;
 	}
 
 	pub(crate) fn update_position(&mut self, new_s_start: &Coordinates) {
 		self.k_m += self.h(&self.s_start, new_s_start);
 		self.s_start = *new_s_start;
-		self
-			.nodes
-			.entry(*new_s_start)
-			.or_insert(
-				Node {
-					g: u32::MAX / 4,
-					rhs: u32::MAX / 4,
-				}
-			);
+		self.nodes.entry(*new_s_start).or_insert(Node {
+			g: u32::MAX / 4,
+			rhs: u32::MAX / 4,
+		});
 	}
 
 	//will return the next node in the path from the position passed to the goal. will return None if this node does not exist
@@ -100,7 +95,10 @@ impl Path {
 	}
 
 	fn update_vertex(&mut self, u: &Coordinates) -> Result<(), &'static str> {
-		let node = self.nodes.get(&u).unwrap_or(&Node { rhs: u32::MAX / 4, g: u32::MAX / 4 });
+		let node = self.nodes.get(&u).unwrap_or(&Node {
+			rhs: u32::MAX / 4,
+			g: u32::MAX / 4,
+		});
 		let node_consistent = node.g == node.rhs;
 
 		if node_consistent {
@@ -128,12 +126,14 @@ impl Path {
 
 			self.U.peek().ok_or("queue empty and no solution found")?.1 < s_start_key
 				|| s_start_node.rhs != s_start_node.g
-		}
-		{
+		} {
 			let (u, k_old) = self.U.pop().ok_or("no solution exists 2")?;
 			let k_new = self.calculate_key(&u).ok_or("could not calculate key")?;
 
-			let node_u = self.nodes.entry(u).or_insert(Node { rhs: u32::MAX / 4, g: u32::MAX / 4 });
+			let node_u = self.nodes.entry(u).or_insert(Node {
+				rhs: u32::MAX / 4,
+				g: u32::MAX / 4,
+			});
 			if k_old < k_new {
 				self.U.insert_or_update(&u, &k_new);
 			} else if node_u.g > node_u.rhs {
@@ -142,7 +142,10 @@ impl Path {
 				for s in Path::pred(&u) {
 					let bellman = self.bellman(&s);
 					if s != self.s_goal {
-						let node_s = self.nodes.entry(s).or_insert(Node { rhs: u32::MAX / 4, g: u32::MAX / 4 });
+						let node_s = self.nodes.entry(s).or_insert(Node {
+							rhs: u32::MAX / 4,
+							g: u32::MAX / 4,
+						});
 						node_s.rhs = bellman;
 					}
 					self.update_vertex(&s)?;
@@ -153,10 +156,12 @@ impl Path {
 				u_self_and_adjacent.push(u);
 
 				for s in u_self_and_adjacent {
-					self
-						.nodes
+					self.nodes
 						.entry(s)
-						.or_insert(Node { rhs: u32::MAX / 4, g: u32::MAX / 4 })
+						.or_insert(Node {
+							rhs: u32::MAX / 4,
+							g: u32::MAX / 4,
+						})
 						.rhs = self.bellman(&s);
 					self.update_vertex(&s)?;
 				}
@@ -283,7 +288,13 @@ impl Path {
 		for s_prime in Path::pred(s) {
 			result = Ord::min(
 				result,
-				self.nodes.get(&s_prime).unwrap_or(&Node { rhs: u32::MAX / 4, g: u32::MAX / 4 }).g + Path::c(s, &s_prime),
+				self.nodes
+					.get(&s_prime)
+					.unwrap_or(&Node {
+						rhs: u32::MAX / 4,
+						g: u32::MAX / 4,
+					})
+					.g + Path::c(s, &s_prime),
 			);
 		}
 

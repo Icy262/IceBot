@@ -11,9 +11,7 @@ pub(crate) struct Schedule {
 
 impl Schedule {
 	pub(crate) fn new() -> Self {
-		Self {
-			tasks: Vec::new(),
-		}
+		Self { tasks: Vec::new() }
 	}
 
 	pub(crate) fn push_task_network(

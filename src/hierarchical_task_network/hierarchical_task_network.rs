@@ -12,7 +12,9 @@ pub(crate) struct HierarchicalTaskNetwork {
 
 impl HierarchicalTaskNetwork {
 	pub(crate) fn new(task: Tasks) -> Self {
-		return Self { tasks: VecDeque::from(vec![task]) };
+		return Self {
+			tasks: VecDeque::from(vec![task]),
+		};
 	}
 
 	pub(crate) fn get_next_behaviour(&mut self) -> Option<Behaviour> {
@@ -43,5 +45,5 @@ impl HierarchicalTaskNetwork {
 
 pub(crate) enum Next {
 	Task(Tasks),
-	Behaviour(Behaviour),	
+	Behaviour(Behaviour),
 }

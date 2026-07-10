@@ -73,7 +73,7 @@ impl PriorityQueue {
 				}
 				_ => {
 					self.priority_queue.pop();
-				},
+				}
 			}
 		}
 
