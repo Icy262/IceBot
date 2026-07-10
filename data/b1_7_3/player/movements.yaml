@@ -15,10 +15,10 @@ Movements:
                 packets.push(
                     Packets::PlayerPositionandLook(
                         PlayerPositionandLook {
-                            x: MCDouble { value:  player.x },
-                            y: MCDouble { value: player.y },
-                            z: MCDouble { value: player.z },
-                            stance: MCDouble { value: player.y as f64 + 1.62 },
+                            x: MCDouble { value:  player.position.x },
+                            y: MCDouble { value: player.position.y },
+                            z: MCDouble { value: player.position.z },
+                            stance: MCDouble { value: player.position.y as f64 + 1.62 },
                             yaw: MCFloat { value: player.yaw as f32 },
                             pitch: MCFloat { value: player.pitch as f32 },
                             on_ground: MCBool { value: player.on_ground },
@@ -47,10 +47,10 @@ Movements:
                 packets.push(
                     Packets::PlayerPositionandLook(
                         PlayerPositionandLook {
-                            x: MCDouble { value:  player.x },
-                            y: MCDouble { value: player.y },
-                            z: MCDouble { value: player.z },
-                            stance: MCDouble { value: player.y as f64 + 1.62 },
+                            x: MCDouble { value:  player.position.x },
+                            y: MCDouble { value: player.position.y },
+                            z: MCDouble { value: player.position.z },
+                            stance: MCDouble { value: player.position.y as f64 + 1.62 },
                             yaw: MCFloat { value: player.yaw as f32 },
                             pitch: MCFloat { value: player.pitch as f32 },
                             on_ground: MCBool { value: player.on_ground },
@@ -72,10 +72,10 @@ Movements:
                 packets.push(
                     Packets::PlayerPositionandLook(
                         PlayerPositionandLook {
-                            x: MCDouble { value:  player.x },
-                            y: MCDouble { value: player.y },
-                            z: MCDouble { value: player.z },
-                            stance: MCDouble { value: player.y as f64 + 1.62 },
+                            x: MCDouble { value:  player.position.x },
+                            y: MCDouble { value: player.position.y },
+                            z: MCDouble { value: player.position.z },
+                            stance: MCDouble { value: player.position.y as f64 + 1.62 },
                             yaw: MCFloat { value: player.yaw as f32 },
                             pitch: MCFloat { value: player.pitch as f32 },
                             on_ground: MCBool { value: player.on_ground },
