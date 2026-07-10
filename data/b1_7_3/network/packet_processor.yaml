@@ -103,10 +103,12 @@ Packet Processor:
         packet processing: |
             WorldUpdate::PlayerUpdate(
                 EntityPositionAndLook {
-                    x: packet.x.value,
                     //The old protocol is super weird and swaps the order of the stance and y fields on the server to client packet. I don't want to make two different versions of the packet, so we can just use the "stance" value, which is actually the y in this case. See https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Player_Position_&_Look_(0x0D)
-                    y: packet.stance.value,
-                    z: packet.z.value,
+                    position: Position {
+                        x: packet.x.value,
+                        y: packet.stance.value,
+                        z: packet.z.value,
+                    },
                     yaw: packet.yaw.value as f64,
                     pitch: packet.pitch.value as f64,
                     on_ground: packet.on_ground.value,
