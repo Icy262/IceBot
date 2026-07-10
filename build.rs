@@ -326,6 +326,7 @@ fn generate_packet_processor(version: &String) {
 	output_code += "use crate::world::block::Coordinates;\n";
 	output_code += "use crate::network::data_types::*;\n";
 	output_code += "use crate::world::entity::EntityPositionAndLook;\n";
+	output_code += "use crate::world::entity::Position;\n";
 	output_code += "use std::io::Read;\n";
 	output_code += "use crate::world::world::Region;\n";
 	output_code += "use flate2::read::ZlibDecoder;\n\n";
