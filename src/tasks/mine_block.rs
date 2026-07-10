@@ -12,9 +12,9 @@ impl MineBlock {
 	pub(crate) fn new(position: &Coordinates, pickup_item: bool) -> Self {
 		let start = PLAYER.with_borrow(|player| {
 			return Coordinates {
-				x: player.x.floor() as i32,
-				y: player.y.floor() as i32,
-				z: player.z.floor() as i32,
+				x: player.position.x.floor() as i32,
+				y: player.position.y.floor() as i32,
+				z: player.position.z.floor() as i32,
 			};
 		});
 
@@ -30,9 +30,9 @@ impl MineBlock {
 		//phase 1: path to block
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
-				x: player.x.floor() as i32,
-				y: player.y.floor() as i32,
-				z: player.z.floor() as i32,
+				x: player.position.x.floor() as i32,
+				y: player.position.y.floor() as i32,
+				z: player.position.z.floor() as i32,
 			};
 		});
 
