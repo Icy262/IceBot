@@ -7,7 +7,6 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::{cell::RefCell, collections::LinkedList};
 
-use crate::{BLOCK_REGISTRY, behaviour, world};
 use crate::behaviour::actions::{Actions, DoNothing, Join, do_action};
 use crate::behaviour::behaviour::Behaviour;
 use crate::behaviour::movements::to_packets;
@@ -22,14 +21,18 @@ use crate::player::Player;
 use crate::scheduler::scheduler::Schedule;
 use crate::tasks::go_to::GoTo;
 use crate::world::block::{self, Block, Coordinates};
+use crate::world::entity::Position;
 use crate::world::world::{WORLD_MODEL, World, WorldUpdate};
+use crate::{BLOCK_REGISTRY, behaviour, world};
 
 thread_local! {
 	pub(crate) static PLAYER: RefCell<Player> = RefCell::new(
 		Player {
-			x: 0f64,
-			y: 0f64,
-			z: 0f64,
+			position: Position {
+				x: 0f64,
+				y: 0f64,
+				z: 0f64,
+			},
 			vx: 0f64,
 			vy: 0f64,
 			vz: 0f64,
@@ -61,9 +64,11 @@ pub(crate) fn bot_main(username: String, server: String) {
 	match position_and_look {
 		WorldUpdate::PlayerUpdate(position_and_look) => {
 			PLAYER.with_borrow_mut(|player| {
-				player.x = position_and_look.x;
-				player.y = position_and_look.y;
-				player.z = position_and_look.z;
+				player.position = Position {
+					x: position_and_look.position.x,
+					y: position_and_look.position.y,
+					z: position_and_look.position.z,
+				};
 				player.yaw = position_and_look.yaw;
 				player.pitch = position_and_look.pitch;
 				player.on_ground = position_and_look.on_ground;
@@ -79,9 +84,9 @@ pub(crate) fn bot_main(username: String, server: String) {
 	let walk_task = HierarchicalTaskNetwork::new(crate::tasks::tasks::Tasks::GoTo(GoTo::new(
 		&PLAYER.with_borrow(|&player| {
 			return Coordinates {
-				x: player.x as i32 - 5,
-				y: player.y as i32,
-				z: player.z as i32 - 3,
+				x: player.position.x.floor() as i32 - 5,
+				y: player.position.y.floor() as i32 ,
+				z: player.position.z.floor() as i32  - 3,
 			};
 		}),
 	)));
@@ -97,9 +102,11 @@ pub(crate) fn bot_main(username: String, server: String) {
 				WorldUpdate::PlayerUpdate(position_and_look) => {
 					println!("Recieved position update from server");
 					PLAYER.with_borrow_mut(|player| {
-						player.x = position_and_look.x;
-						player.y = position_and_look.y;
-						player.z = position_and_look.z;
+						player.position = Position {
+							x: position_and_look.position.x,
+							y: position_and_look.position.y,
+							z: position_and_look.position.z,
+						};
 						player.yaw = position_and_look.yaw;
 						player.pitch = position_and_look.pitch;
 						player.on_ground = position_and_look.on_ground;
@@ -117,7 +124,10 @@ pub(crate) fn bot_main(username: String, server: String) {
 			}
 		}
 
-		let Some(behaviour) = task_scheduler.get_next_behaviour() else { println!("skipped"); continue; };
+		let Some(behaviour) = task_scheduler.get_next_behaviour() else {
+			println!("skipped");
+			continue;
+		};
 		do_action(behaviour.action, &mut server_connection);
 		do_movement(behaviour.movement, &mut server_connection);
 
