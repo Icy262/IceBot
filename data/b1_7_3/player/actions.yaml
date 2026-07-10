@@ -30,6 +30,11 @@ Actions:
             let mut packets: Vec<Packets> = Vec::new();
             return packets;
 
+    -   name: BreakBlock
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
+
     -   name: PlaceBlock
         packet conversion: |
             //TODO: implement
