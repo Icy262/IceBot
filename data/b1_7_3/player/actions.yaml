@@ -32,7 +32,31 @@ Actions:
 
     -   name: BreakBlock
         packet conversion: |
+            //TODO: implement face
+            //TODO: implement calculating the correct number of ticks to break a block, and track ticks since started breaking
+            //status 0 means start, 2 means finished
             let mut packets: Vec<Packets> = Vec::new();
+
+            packets.push(Packets::PlayerDigging (
+                PlayerDigging {
+                    status: MCByte { value: 0 },
+                    x: MCInt { value: action.position.x },
+                    y: MCByte { value: action.position.y as i8 },
+                    z: MCInt { value: action.position.z },
+                    face: MCByte { value: 0 },
+                }
+            ));
+            
+            packets.push(Packets::PlayerDigging (
+                PlayerDigging {
+                    status: MCByte { value: 2 },
+                    x: MCInt { value: action.position.x },
+                    y: MCByte { value: action.position.y as i8 },
+                    z: MCInt { value: action.position.z },
+                    face: MCByte { value: 0 },
+                }
+            ));
+
             return packets;
 
     -   name: PlaceBlock
