@@ -1,4 +1,5 @@
 use crate::behaviour;
+use crate::behaviour::actions::PlaceBlock;
 use crate::behaviour::behaviour::Behaviour;
 use crate::hierarchical_task_network::hierarchical_task_network::Next;
 use crate::tasks::mine_block::MineBlock;
@@ -10,6 +11,7 @@ pub(crate) enum Tasks {
 	FindItem(FindItem),
 	ClearRegion(ClearRegion),
 	MineBlock(MineBlock),
+	PlaceBlock(PlaceBlock),
 }
 
 impl Tasks {
@@ -20,6 +22,7 @@ impl Tasks {
 			Tasks::FindItem(task) => task.get_next(),
 			Tasks::ClearRegion(task) => task.get_next(),
 			Tasks::MineBlock(task) => task.get_next(),
+			Tasks::PlaceBlock(task) => task.get_next(),
 		}
 	}
 
@@ -30,6 +33,7 @@ impl Tasks {
 			Tasks::FindItem(task) => task.complete(),
 			Tasks::ClearRegion(task) => task.complete(),
 			Tasks::MineBlock(task) => task.complete(),
+			Tasks::PlaceBlock(task) => task.complete(),
 		};
 	}
 }
