@@ -1,4 +1,6 @@
-use crate::{hierarchical_task_network::hierarchical_task_network::Next, world::block::Coordinates};
+use crate::hierarchical_task_network::hierarchical_task_network::Next;
+use crate::world::block::Coordinates;
+use crate::world::world::World;
 
 //Place a specified block at a specified location. handles finding the block in inventory or obtaining it from the world, selecting it in hand, and placing it
 pub(crate) struct PlaceBlock {
@@ -12,6 +14,6 @@ impl PlaceBlock {
 	}
 
 	pub(crate) fn complete(&self) -> bool {
-		return false;
+		World::get_block(self.position).is_some_and(|block| self.block == block.block_id)
 	}
 }
