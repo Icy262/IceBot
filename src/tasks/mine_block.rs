@@ -75,8 +75,8 @@ impl MineBlock {
 				.expect("block should be in registry")
 				.collision
 			{
-				Collision::Solid => true,
-				_ => false,
+				Collision::Solid => false,
+				_ => true,
 			}
 		})
 	}
