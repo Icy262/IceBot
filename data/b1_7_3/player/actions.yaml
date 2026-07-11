@@ -61,6 +61,47 @@ Actions:
 
     -   name: PlaceBlock
         packet conversion: |
-            //TODO: implement
             let mut packets: Vec<Packets> = Vec::new();
+
+            //https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol?oldid=2769763#Player_Block_Placement_(0x0F)
+            //https://minecraft.fandom.com/wiki/Coordinates
+            let direction = match action.rotation {
+                Direction::Down => 0,
+                Direction::Up => 1,
+                Direction::North => 2,
+                Direction::South => 3,
+                Direction::West => 4,
+                Direction::East => 5,
+            };
+
+            //need to shift the position 1 block in the opposite direction from where it is facing because the server expects the block we are placing against and the direction we are placing against 
+            let x_position = match action.rotation {
+                Direction::East => action.position.x - 1,
+                Direction::West => action.position.x + 1,
+                _ => action.position.x,
+            };
+            let y_position = match action.rotation {
+                Direction::Up => action.position.y - 1,
+                Direction::Down => action.position.y + 1,
+                _ => action.position.y,
+            };
+            let z_position = match action.rotation {
+                Direction::South => action.position.z- 1,
+                Direction::North => action.position.z + 1,
+                _ => action.position.z,
+            };
+
+            //we can just send block/item id, amount, and damage as 0 because the server doesn't care. it seems to be a holdover from alpha versions where server side inventory didn't exist
+            packets.push(Packets::PlayerBlockPlacement (
+                    PlayerBlockPlacement {
+                        x: MCInt { value: x_position },
+                        y: MCByte { value: y_position as i8},
+                        z: MCInt { value: z_position },
+                        direction: MCByte { value: direction },
+                        block_or_item_id: MCShort { value: 0 },
+                        amount: MCByte { value: 0 },
+                        damage: MCShort { value: 0 },
+                    }
+            ));
+
             return packets;
