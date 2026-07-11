@@ -225,7 +225,8 @@ fn generate_action_translation(version: &String) {
 	//import all packets and data types because we don't know what we might need
 	output_code += "use crate::behaviour::actions::Actions;\n";
 	output_code += "use crate::network::packets::*;\n";
-	output_code += "use crate::network::data_types::*;\n\n";
+	output_code += "use crate::network::data_types::*;\n";
+	output_code += "use crate::world::block::Direction;\n\n";
 
 	//generate the to_packets for each individual action
 	for action in actions_spec {
