@@ -40,14 +40,14 @@ pub(crate) struct BreakBlock {
 	pub(crate) face: Direction,       //face of block we are hitting
 }
 
-//For if we just want a block in a particular position
+//To place a block at a specific position facing a specific direction
 pub(crate) struct PlaceBlock {
 	pub(crate) position: Coordinates, //position of the block's location
 	pub(crate) rotation: Direction,   //direction of the placed block
 }
 
-//For if we want to specify the block we are placing against
-pub(crate) struct PlaceBlockAgainst {
-	pub(crate) position: Coordinates, //position of the block we are placing against
-	pub(crate) rotation: Direction,   //direction of the placed block
-}
+////For if we want to specify the block we are placing against
+//pub(crate) struct PlaceBlockAgainst {
+//	pub(crate) position: Coordinates, //position of the block we are placing against
+//	pub(crate) rotation: Direction,   //direction of the placed block
+//}
