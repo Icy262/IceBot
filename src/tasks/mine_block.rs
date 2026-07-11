@@ -36,7 +36,6 @@ impl MineBlock {
 	}
 
 	pub(crate) fn get_next(&mut self) -> Option<Next> {
-		//-> Option<Behaviour> {
 		//phase 1: path to block
 		let current_pos = PLAYER.with_borrow(|player| {
 			return Coordinates {
