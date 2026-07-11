@@ -10,6 +10,9 @@ pub(crate) struct PlaceBlock {
 
 impl PlaceBlock {
 	pub(crate) fn get_next(&mut self) -> Option<Next> {
+		//phase 1: path to block
+		//phase 2: select block
+		//phase 3: place
 		return None;
 	}
 
