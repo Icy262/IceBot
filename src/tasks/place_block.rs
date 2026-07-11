@@ -5,3 +5,13 @@ pub(crate) struct PlaceBlock {
 	position: Coordinates,
 	block: String,
 }
+
+impl PlaceBlock {
+	pub(crate) fn get_next(&mut self) -> Option<Next> {
+		return None;
+	}
+
+	pub(crate) fn complete(&self) -> bool {
+		return false;
+	}
+}
