@@ -37,6 +37,7 @@ mod tasks {
 	pub(crate) mod gather;
 	pub(crate) mod go_to;
 	pub(crate) mod mine_block;
+	pub(crate) mod place_block;
 	pub(crate) mod tasks;
 }
 mod tool;
