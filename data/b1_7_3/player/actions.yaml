@@ -64,9 +64,3 @@ Actions:
             //TODO: implement
             let mut packets: Vec<Packets> = Vec::new();
             return packets;
-
-    -   name: PlaceBlockAgainst
-        packet conversion: |
-            //TODO: implement
-            let mut packets: Vec<Packets> = Vec::new();
-            return packets;
