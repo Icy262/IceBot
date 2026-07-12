@@ -11,6 +11,22 @@ pub(crate) struct PlaceBlock {
 impl PlaceBlock {
 	pub(crate) fn get_next(&mut self) -> Option<Next> {
 		//phase 1: path to block
+		let current_pos = PLAYER.with_borrow(|player| {
+			return Coordinates {
+				x: player.position.x.floor() as i32,
+				y: player.position.y.floor() as i32,
+				z: player.position.z.floor() as i32,
+			};
+		});
+
+		//TODO: implement actual line of sight and distance check instead of just checking +- on all axes
+		if (self.position.x - current_pos.x).abs() >= 1
+			&& (self.position.y - current_pos.y).abs() >= 1
+			&& (self.position.z - current_pos.z).abs() >= 1
+		{
+			return Some(Next::Task(Tasks::GoTo(GoTo::new(&self.position))));
+		}
+
 		//phase 2: select block
 		//phase 3: place
 		return None;
