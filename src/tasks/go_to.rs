@@ -62,7 +62,8 @@ impl GoTo {
 				})?;
 
 				//check if block above head is free
-				if BLOCK_REGISTRY.get(block_above.block_id.as_str())?.collision == Collision::Solid {
+				if BLOCK_REGISTRY.get(block_above.block_id.as_str())?.collision == Collision::Solid
+				{
 					//push task to break block above head
 					Next::Task(Tasks::MineBlock(mine_block::MineBlock::new(
 						&block_above.position,
@@ -108,7 +109,8 @@ impl GoTo {
 				if BLOCK_REGISTRY
 					.get(block_head.block_id.as_str())
 					.expect("block id should be in registry")
-					.collision == Collision::Solid {
+					.collision == Collision::Solid
+				{
 					Next::Task(Tasks::MineBlock(mine_block::MineBlock::new(
 						&block_head.position,
 						false,
@@ -116,7 +118,8 @@ impl GoTo {
 				} else if BLOCK_REGISTRY
 					.get(&block_feet.block_id)
 					.expect("block id should be in registry")
-					.collision == Collision::Solid {
+					.collision == Collision::Solid
+				{
 					Next::Task(Tasks::MineBlock(mine_block::MineBlock::new(
 						&block_feet.position,
 						false,
@@ -124,7 +127,8 @@ impl GoTo {
 				} else if BLOCK_REGISTRY
 					.get(block_support.block_id.as_str())
 					.expect("block id should be in registry")
-					.collision != Collision::Solid {
+					.collision != Collision::Solid
+				{
 					//TODO: implement selecting a cheap block
 					Next::Task(Tasks::PlaceBlock(place_block::PlaceBlock {
 						position: block_support.position,
