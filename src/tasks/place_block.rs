@@ -1,17 +1,17 @@
 use crate::behaviour::actions::{self, Actions};
 use crate::behaviour::behaviour::Behaviour;
 use crate::behaviour::movements::{Movements, NoInput};
+use crate::bot::PLAYER;
 use crate::hierarchical_task_network::hierarchical_task_network::Next;
+use crate::tasks::go_to::GoTo;
+use crate::tasks::tasks::Tasks;
 use crate::world::block::{Coordinates, Direction};
 use crate::world::world::World;
-use crate::bot::PLAYER;
-use crate::tasks::tasks::Tasks;
-use crate::tasks::go_to::GoTo;
 
 //Place a specified block at a specified location. handles finding the block in inventory or obtaining it from the world, selecting it in hand, and placing it
 pub(crate) struct PlaceBlock {
-	position: Coordinates,
-	block: String,
+	pub(crate) position: Coordinates,
+	pub(crate) block: String,
 }
 
 impl PlaceBlock {
