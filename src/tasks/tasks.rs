@@ -1,7 +1,10 @@
 use crate::behaviour;
 use crate::behaviour::behaviour::Behaviour;
 use crate::hierarchical_task_network::hierarchical_task_network::Next;
-use crate::tasks::{clear_region::ClearRegion, find_item::FindItem, gather::Gather, go_to::GoTo, mine_block::MineBlock, place_block::PlaceBlock};
+use crate::tasks::{
+	clear_region::ClearRegion, find_item::FindItem, gather::Gather, go_to::GoTo,
+	mine_block::MineBlock, place_block::PlaceBlock,
+};
 
 pub(crate) enum Tasks {
 	GoTo(GoTo),
