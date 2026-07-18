@@ -34,12 +34,15 @@ impl BlockType {
 		//TODO: implement
 	}
 }
+
+#[derive(PartialEq)]
 pub(crate) enum Collision {
 	Solid,
 	NonSolid,
 	Liquid,
 }
 
+#[derive(PartialEq)]
 pub(crate) enum LightTransparency {
 	Opaque,
 	Transparent,
