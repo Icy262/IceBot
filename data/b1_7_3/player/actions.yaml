@@ -105,3 +105,13 @@ Actions:
             ));
 
             return packets;
+
+    -   name: OpenPlayerInventory
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
+
+    -   name: OpenInventory
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
