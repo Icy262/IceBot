@@ -9,6 +9,7 @@ pub(crate) enum Actions {
 	BreakBlock(BreakBlock),
 	PlaceBlock(PlaceBlock),
 	OpenPlayerInventory(OpenPlayerInventory),
+	OpenInventory(OpenInventory),
 	//PlaceBlockAgainst(PlaceBlockAgainst),
 }
 
@@ -19,6 +20,7 @@ pub(crate) fn to_packets(action: Actions) -> Vec<Packets> {
 		Actions::BreakBlock(action) => BreakBlock::to_packets(action),
 		Actions::PlaceBlock(action) => PlaceBlock::to_packets(action),
 		Actions::OpenPlayerInventory(action) => OpenPlayerInventory::to_packets(action),
+		Actions::OpenInventory(action) => OpenInventory::to_packets(action),
 		//Actions::PlaceBlockAgainst(action) => PlaceBlockAgainst::to_packets(action),
 	}
 }
@@ -54,4 +56,10 @@ pub(crate) struct PlaceBlock {
 //	pub(crate) rotation: Direction,   //direction of the placed block
 //}
 
+//for opening the player's inventory
 pub(crate) struct OpenPlayerInventory {}
+
+//for opening inventories like chests or furnaces
+pub(crate) struct OpenInventory {
+	position: Coordinates,
+}
