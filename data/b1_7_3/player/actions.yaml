@@ -108,6 +108,7 @@ Actions:
 
     -   name: OpenPlayerInventory
         packet conversion: |
+            //Do nothing because b1.7.3 doesn't require the client to inform the server on player inventory open
             let mut packets: Vec<Packets> = Vec::new();
             return packets;
 
