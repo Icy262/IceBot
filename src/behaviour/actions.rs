@@ -63,3 +63,5 @@ pub(crate) struct OpenPlayerInventory {}
 pub(crate) struct OpenInventory {
 	position: Coordinates,
 }
+
+pub(crate) struct CloseInventory {}
