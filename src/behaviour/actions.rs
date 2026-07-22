@@ -64,4 +64,5 @@ pub(crate) struct OpenInventory {
 	position: Coordinates,
 }
 
+//for closing inventories
 pub(crate) struct CloseInventory {}
