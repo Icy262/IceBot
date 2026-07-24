@@ -142,3 +142,8 @@ Actions:
             ));
 
             return packets;
+
+-   name: CloseInventory
+        packet conversion: |
+            let mut packets: Vec<Packets> = Vec::new();
+            return packets;
